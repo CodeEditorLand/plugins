@@ -1,12 +1,12 @@
 {
+	"name": "@swc/plugin-transform-imports",
+	"description": "SWC plugin for https://www.npmjs.com/package/babel-plugin-transform-imports",
+	"main": "swc_plugin_transform_imports.wasm",
+	"scripts": {
+		"prepack": "cargo build --release -p swc_plugin_transform_imports --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_transform_imports.wasm ."
+	},
 	"dependencies": {
 		"@swc/counter": "0.1.3"
 	},
-	"description": "SWC plugin for https://www.npmjs.com/package/babel-plugin-transform-imports",
-	"main": "swc_plugin_transform_imports.wasm",
-	"name": "@swc/plugin-transform-imports",
-	"preferUnplugged": true,
-	"scripts": {
-		"prepack": "cargo build --release -p swc_plugin_transform_imports --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_transform_imports.wasm ."
-	}
+	"preferUnplugged": true
 }
