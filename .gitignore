@@ -1,3 +1,4 @@
+/target
 *.node
 .DS_Store
 *.html

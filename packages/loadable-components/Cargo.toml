@@ -1,19 +1,19 @@
 [package]
 
-authors = { workspace = true }
-description = "SWC plugin for `@loadable/components`"
-edition = { workspace = true }
-homepage = { workspace = true }
-license = { workspace = true }
-name = "swc_plugin_loadable_components"
-publish = false
-repository = { workspace = true }
+authors      = { workspace = true }
+description  = "SWC plugin for `@loadable/components`"
+edition      = { workspace = true }
+homepage     = { workspace = true }
+license      = { workspace = true }
+name         = "swc_plugin_loadable_components"
+publish      = false
+repository   = { workspace = true }
 rust-version = { workspace = true }
-version = "0.18.4"
+version      = "0.18.4"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path = "Source/lib.rs"
 
 [dependencies]
 once_cell = { workspace = true }
@@ -22,8 +22,8 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 swc_common = { workspace = true, features = ["concurrent"] }
 swc_core = { workspace = true, features = [
-	"ecma_quote",
-	"ecma_plugin_transform",
+  "ecma_quote",
+  "ecma_plugin_transform",
 ] }
 swc_ecma_ast = { workspace = true }
 swc_ecma_utils = { workspace = true }
