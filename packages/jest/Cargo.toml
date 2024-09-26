@@ -1,26 +1,25 @@
 [package]
-authors      = { workspace = true }
-description  = "Jest plugin for https://swc.rs"
-edition      = { workspace = true }
-homepage     = { workspace = true }
-license      = { workspace = true }
-name         = "swc_plugin_jest"
-publish      = false
-repository   = { workspace = true }
+authors = { workspace = true }
+description = "Jest plugin for https://swc.rs"
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+name = "swc_plugin_jest"
+publish = false
+repository = { workspace = true }
 rust-version = { workspace = true }
-version      = "0.31.4"
-
+version = "0.31.4"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-phf              = { workspace = true, features = ["macros"] }
-serde            = { workspace = true, features = ["derive"] }
-swc_common       = { workspace = true, features = ["concurrent"] }
-swc_core         = { workspace = true, features = ["ecma_plugin_transform"] }
-swc_ecma_ast     = { workspace = true }
-swc_ecma_utils   = { workspace = true }
-swc_ecma_visit   = { workspace = true }
+phf = { workspace = true, features = ["macros"] }
+serde = { workspace = true, features = ["derive"] }
+swc_common = { workspace = true, features = ["concurrent"] }
+swc_core = { workspace = true, features = ["ecma_plugin_transform"] }
+swc_ecma_ast = { workspace = true }
+swc_ecma_utils = { workspace = true }
+swc_ecma_visit = { workspace = true }
 swc_plugin_macro = { workspace = true }
-tracing          = { workspace = true, features = ["release_max_level_off"] }
+tracing = { workspace = true, features = ["release_max_level_off"] }

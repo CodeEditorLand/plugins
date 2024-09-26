@@ -2,17 +2,15 @@
 
 description = "SWC plugin for preact refresh."
 
-
-authors      = { workspace = true }
-edition      = { workspace = true }
-homepage     = { workspace = true }
-license      = { workspace = true }
-name         = "swc_plugin_prefresh"
-publish      = false
-repository   = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+name = "swc_plugin_prefresh"
+publish = false
+repository = { workspace = true }
 rust-version = { workspace = true }
-version      = "0.1.0"
-
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -20,6 +18,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde_json = { workspace = true }
 swc_common = { workspace = true }
-swc_core   = { workspace = true, features = ["ecma_plugin_transform"] }
+swc_core = { workspace = true, features = ["ecma_plugin_transform"] }
 
 swc_prefresh = { path = "./transform" }

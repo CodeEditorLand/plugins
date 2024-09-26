@@ -2,32 +2,28 @@
 
 description = "AST Transforms for realy"
 
-
 name = "swc_relay"
 
-authors      = { workspace = true }
-edition      = { workspace = true }
-homepage     = { workspace = true }
-license      = { workspace = true }
-repository   = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
 rust-version = { workspace = true }
-version      = "0.44.26"
-
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version = "0.44.26"
 
 [dependencies]
-once_cell      = { workspace = true }
-regex          = { workspace = true }
-serde          = { workspace = true }
-serde_json     = { workspace = true }
-swc_atoms      = { workspace = true }
-swc_common     = { workspace = true, features = ["concurrent"] }
-swc_ecma_ast   = { workspace = true }
+once_cell = { workspace = true }
+regex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+swc_atoms = { workspace = true }
+swc_common = { workspace = true, features = ["concurrent"] }
+swc_ecma_ast = { workspace = true }
 swc_ecma_utils = { workspace = true }
 swc_ecma_visit = { workspace = true }
-tracing        = { workspace = true }
+tracing = { workspace = true }
 
 [dev-dependencies]
 swc_ecma_transforms_testing = { workspace = true }
-testing                     = { workspace = true }
+testing = { workspace = true }
