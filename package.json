@@ -1,8 +1,7 @@
 {
-	"devDependencies": {
-		"@changesets/cli": "2.27.8",
-		"@taplo/cli": "0.7.0",
-		"lint-staged": "15.2.10"
+	"name": "swc-plugins",
+	"scripts": {
+		"prepare": "husky install"
 	},
 	"lint-staged": {
 		"!(**/tests/**/*)*.js": [
@@ -24,8 +23,9 @@
 			"taplo format"
 		]
 	},
-	"name": "swc-plugins",
-	"scripts": {
-		"prepare": "husky install"
+	"devDependencies": {
+		"@changesets/cli": "2.27.8",
+		"@taplo/cli": "0.7.0",
+		"lint-staged": "15.2.10"
 	}
 }
