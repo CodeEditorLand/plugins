@@ -1,35 +1,31 @@
 {
-  "name": "swc-plugins",
-  "packageManager": "pnpm@8.6.3",
-  "private": true,
-  "scripts": {
-    "prepare": "husky install"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "@taplo/cli": "^0.7.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
-    "prettier": "^3.2.5"
-  },
-  "lint-staged": {
-    "*.toml": [
-      "taplo format"
-    ],
-    "*.rs": [
-      "cargo fmt --"
-    ],
-    "!(**/tests/**/*)*.js": [
-      "prettier --write"
-    ],
-    "!(**/tests/**/*)*.ts": [
-      "prettier --write"
-    ],
-    "!(**/tests/**/*)*.jsx": [
-      "prettier --write"
-    ],
-    "!(**/tests/**/*)*.tsx": [
-      "prettier --write"
-    ]
-  }
+	"devDependencies": {
+		"@changesets/cli": "2.27.8",
+		"@taplo/cli": "0.7.0",
+		"lint-staged": "15.2.10"
+	},
+	"lint-staged": {
+		"!(**/tests/**/*)*.js": [
+			"prettier --write"
+		],
+		"!(**/tests/**/*)*.jsx": [
+			"prettier --write"
+		],
+		"!(**/tests/**/*)*.ts": [
+			"prettier --write"
+		],
+		"!(**/tests/**/*)*.tsx": [
+			"prettier --write"
+		],
+		"*.rs": [
+			"cargo fmt --"
+		],
+		"*.toml": [
+			"taplo format"
+		]
+	},
+	"name": "swc-plugins",
+	"scripts": {
+		"prepare": "husky install"
+	}
 }
