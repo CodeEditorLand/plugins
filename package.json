@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"@changesets/cli": "2.27.8",
+		"@changesets/cli": "2.27.9",
 		"@taplo/cli": "0.7.0",
 		"lint-staged": "15.2.10"
 	},
