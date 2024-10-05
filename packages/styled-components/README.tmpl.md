@@ -10,19 +10,19 @@ Then update your `.swcrc` file like below:
 
 ```json
 {
-  "jsc": {
-    "experimental": {
-      "plugins": [
-        [
-          "@swc/plugin-styled-components",
-          {
-            "displayName": true,
-            "ssr": true
-          }
-        ]
-      ]
-    }
-  }
+	"jsc": {
+		"experimental": {
+			"plugins": [
+				[
+					"@swc/plugin-styled-components",
+					{
+						"displayName": true,
+						"ssr": true
+					}
+				]
+			]
+		}
+	}
 }
 ```
 
