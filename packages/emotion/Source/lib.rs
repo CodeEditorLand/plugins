@@ -3,11 +3,7 @@
 use std::path::Path;
 
 use serde::Deserialize;
-use swc_common::{
-	plugin::metadata::TransformPluginMetadataContextKind,
-	SourceMapper,
-	Spanned,
-};
+use swc_common::{plugin::metadata::TransformPluginMetadataContextKind, SourceMapper, Spanned};
 use swc_ecma_ast::Program;
 use swc_ecma_visit::FoldWith;
 use swc_emotion::EmotionOptions;
@@ -42,28 +38,21 @@ impl EmotionJsOptions {
 				"development" => self.source_map.unwrap_or(true),
 				_ => false,
 			}),
-			auto_label:Some(
-				match self.auto_label.unwrap_or(EmotionJsAutoLabel::DevOnly) {
-					EmotionJsAutoLabel::Always => true,
-					EmotionJsAutoLabel::Never => false,
-					EmotionJsAutoLabel::DevOnly => {
-						matches!(env_name, "development")
-					},
+			auto_label:Some(match self.auto_label.unwrap_or(EmotionJsAutoLabel::DevOnly) {
+				EmotionJsAutoLabel::Always => true,
+				EmotionJsAutoLabel::Never => false,
+				EmotionJsAutoLabel::DevOnly => {
+					matches!(env_name, "development")
 				},
-			),
-			label_format:Some(
-				self.label_format.unwrap_or_else(|| "[local]".to_string()),
-			),
+			}),
+			label_format:Some(self.label_format.unwrap_or_else(|| "[local]".to_string())),
 			..self.extra
 		}
 	}
 }
 
 #[plugin_transform]
-pub fn process_transform(
-	program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+pub fn process_transform(program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<EmotionJsOptions>(
 		&data
 			.get_transform_plugin_config()
@@ -72,9 +61,7 @@ pub fn process_transform(
 	.expect("invalid config for emotion");
 
 	let config = config.into_emotion_options(
-		&data
-			.get_context(&TransformPluginMetadataContextKind::Env)
-			.unwrap_or_default(),
+		&data.get_context(&TransformPluginMetadataContextKind::Env).unwrap_or_default(),
 	);
 	let file_name = data
 		.get_context(&TransformPluginMetadataContextKind::Filename)
@@ -83,11 +70,5 @@ pub fn process_transform(
 	let source_map = std::sync::Arc::new(data.source_map);
 	let pos = source_map.lookup_char_pos(program.span().lo);
 	let hash = pos.file.src_hash as u32;
-	program.fold_with(&mut swc_emotion::emotion(
-		config,
-		path,
-		hash,
-		source_map,
-		data.comments,
-	))
+	program.fold_with(&mut swc_emotion::emotion(config, path, hash, source_map, data.comments))
 }

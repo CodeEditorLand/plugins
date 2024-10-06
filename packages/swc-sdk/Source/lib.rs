@@ -10,10 +10,7 @@ use swc_core::{
 };
 
 #[plugin_transform]
-fn swc_sdk_plugin(
-	mut program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn swc_sdk_plugin(mut program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<swc_sdk::config::Config>(
 		&data
 			.get_transform_plugin_config()

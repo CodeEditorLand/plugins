@@ -42,28 +42,19 @@ fn get_config(plugin_config:&str) -> PluginConfig {
 }
 
 #[plugin_transform]
-fn loadable_components_plugin(
-	mut program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn loadable_components_plugin(mut program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = get_config(
 		&data
 			.get_transform_plugin_config()
 			.expect("failed to get plugin config for swc-loadable-components"),
 	);
 
-	program.visit_mut_with(&mut loadable_transform(
-		PluginCommentsProxy,
-		config.signatures,
-	));
+	program.visit_mut_with(&mut loadable_transform(PluginCommentsProxy, config.signatures));
 
 	program
 }
 
-pub fn loadable_transform<C>(
-	comments:C,
-	signatures:Vec<Signature>,
-) -> impl VisitMut
+pub fn loadable_transform<C>(comments:C, signatures:Vec<Signature>) -> impl VisitMut
 where
 	C: Comments, {
 	Loadable { comments, signatures, specifiers:HashSet::new() }
@@ -84,15 +75,9 @@ where
 	fn is_valid_identifier(&self, e:&Expr) -> bool {
 		match e {
 			Expr::Ident(i) => self.specifiers.contains(&i.sym),
-			Expr::Member(MemberExpr {
-				obj,
-				prop: MemberProp::Ident(prop),
-				..
-			}) => {
+			Expr::Member(MemberExpr { obj, prop: MemberProp::Ident(prop), .. }) => {
 				match &**obj {
-					Expr::Ident(i) => {
-						self.specifiers.contains(&i.sym) && &*prop.sym == "lib"
-					},
+					Expr::Ident(i) => self.specifiers.contains(&i.sym) && &*prop.sym == "lib",
 					_ => false,
 				}
 			},
@@ -110,9 +95,7 @@ where
 
 	fn has_loadable_comment(&self, lo:BytePos) -> bool {
 		if self.comments.with_leading(lo, |comments| {
-			comments
-				.iter()
-				.any(|comment| comment.text.contains("#__LOADABLE__"))
+			comments.iter().any(|comment| comment.text.contains("#__LOADABLE__"))
 		}) {
 			// Remove this comment
 			let comments = self.comments.take_leading(lo);
@@ -175,16 +158,10 @@ where
 		.into()
 	}
 
-	fn create_resolved_property(
-		&mut self,
-		_import:&CallExpr,
-		_func:&Expr,
-	) -> KeyValueProp {
+	fn create_resolved_property(&mut self, _import:&CallExpr, _func:&Expr) -> KeyValueProp {
 		KeyValueProp {
 			key:PropName::Ident(quote_ident!("resolved")),
-			value:Box::new(
-				ObjectLit { span:DUMMY_SP, props:Default::default() }.into(),
-			),
+			value:Box::new(ObjectLit { span:DUMMY_SP, props:Default::default() }.into()),
 		}
 	}
 
@@ -214,14 +191,11 @@ where
 			v.split(',')
 				.map(|v| v.trim())
 				.filter_map(|item| {
-					let s =
-						item.split(':').map(|s| s.trim()).collect::<Vec<_>>();
+					let s = item.split(':').map(|s| s.trim()).collect::<Vec<_>>();
 					if s.len() == 2 {
 						return Some((
 							s[0].to_string(),
-							serde_json::Value::String(
-								s[1].trim_matches(['"', '\'']).to_string(),
-							),
+							serde_json::Value::String(s[1].trim_matches(['"', '\'']).to_string()),
 						));
 					}
 
@@ -231,19 +205,13 @@ where
 		)
 	}
 
-	fn get_raw_chunk_name_from_comments(
-		&self,
-		import_arg:&Expr,
-	) -> Option<serde_json::Value> {
+	fn get_raw_chunk_name_from_comments(&self, import_arg:&Expr) -> Option<serde_json::Value> {
 		let chunk_name_comment = self.get_chunk_name_content(import_arg);
 
 		chunk_name_comment.map(|v| self.read_webpack_comment_values(v))
 	}
 
-	fn get_existing_chunk_name_comment(
-		&self,
-		import:&CallExpr,
-	) -> Option<serde_json::Value> {
+	fn get_existing_chunk_name_comment(&self, import:&CallExpr) -> Option<serde_json::Value> {
 		let import_arg = get_import_arg(import);
 
 		self.get_raw_chunk_name_from_comments(import_arg)
@@ -263,11 +231,7 @@ where
 		}
 	}
 
-	fn add_or_replace_chunk_name_comment(
-		&self,
-		import:&CallExpr,
-		values:serde_json::Value,
-	) {
+	fn add_or_replace_chunk_name_comment(&self, import:&CallExpr, values:serde_json::Value) {
 		let import_arg = get_import_arg(import);
 
 		let chunk_name_content = self.get_chunk_name_content(import_arg);
@@ -276,8 +240,7 @@ where
 
 			if let Some(mut comments) = comments {
 				comments.retain(|c| !c.text.contains("webpackChunkName"));
-				self.comments
-					.add_leading_comments(import_arg.span_lo(), comments)
+				self.comments.add_leading_comments(import_arg.span_lo(), comments)
 			}
 		}
 
@@ -315,19 +278,15 @@ where
 		);
 
 		if chunk_name_node.is_tpl() {
-			webpack_chunk_name =
-				Some(self.chunk_name_from_template_literal(&chunk_name_node));
-			chunk_name_node = self.sanitize_chunk_name_template_literal(
-				Box::new(chunk_name_node),
-			);
+			webpack_chunk_name = Some(self.chunk_name_from_template_literal(&chunk_name_node));
+			chunk_name_node = self.sanitize_chunk_name_template_literal(Box::new(chunk_name_node));
 		} else if let Expr::Lit(Lit::Str(s)) = &chunk_name_node {
 			webpack_chunk_name = Some(s.value.to_string());
 		}
 		let mut values = values.unwrap_or_default();
 
 		if let Some(webpack_chunk_name) = webpack_chunk_name {
-			values["webpackChunkName"] =
-				serde_json::Value::String(webpack_chunk_name);
+			values["webpackChunkName"] = serde_json::Value::String(webpack_chunk_name);
 		} else {
 			values["webpackChunkName"] = serde_json::Value::Null;
 		}
@@ -335,11 +294,7 @@ where
 		chunk_name_node
 	}
 
-	fn create_chunk_name_method(
-		&mut self,
-		import:&CallExpr,
-		func:&Expr,
-	) -> MethodProp {
+	fn create_chunk_name_method(&mut self, import:&CallExpr, func:&Expr) -> MethodProp {
 		MethodProp {
 			key:PropName::Ident(quote_ident!("chunkName")),
 			function:Box::new(Function {
@@ -358,11 +313,7 @@ where
 		}
 	}
 
-	fn create_is_ready_method(
-		&mut self,
-		_import:&CallExpr,
-		_func:&Expr,
-	) -> MethodProp {
+	fn create_is_ready_method(&mut self, _import:&CallExpr, _func:&Expr) -> MethodProp {
 		MethodProp {
 			key:PropName::Ident(quote_ident!("isReady")),
 			function:Box::new(Function {
@@ -397,22 +348,14 @@ where
 		}
 	}
 
-	fn create_import_async_property(
-		&mut self,
-		_import:&CallExpr,
-		func:&Expr,
-	) -> KeyValueProp {
+	fn create_import_async_property(&mut self, _import:&CallExpr, func:&Expr) -> KeyValueProp {
 		KeyValueProp {
 			key:PropName::Ident(quote_ident!("importAsync")),
 			value:Box::new(func.clone()),
 		}
 	}
 
-	fn create_require_async_method(
-		&mut self,
-		_import:&CallExpr,
-		_func:&Expr,
-	) -> MethodProp {
+	fn create_require_async_method(&mut self, _import:&CallExpr, _func:&Expr) -> MethodProp {
 		MethodProp {
 			key:PropName::Ident(quote_ident!("requireAsync")),
 			function:Box::new(Function {
@@ -443,11 +386,7 @@ where
 		}
 	}
 
-	fn create_require_sync_method(
-		&mut self,
-		_import:&CallExpr,
-		_func:&Expr,
-	) -> MethodProp {
+	fn create_require_sync_method(&mut self, _import:&CallExpr, _func:&Expr) -> MethodProp {
 		MethodProp {
 			key:PropName::Ident(quote_ident!("requireSync")),
 			function:Box::new(Function {
@@ -479,11 +418,7 @@ where
 		}
 	}
 
-	fn create_resolve_method(
-		&mut self,
-		import:&CallExpr,
-		func:&Expr,
-	) -> MethodProp {
+	fn create_resolve_method(&mut self, import:&CallExpr, func:&Expr) -> MethodProp {
 		fn get_call_value(import:&CallExpr) -> Expr {
 			let import_arg = get_import_arg(import);
 
@@ -543,11 +478,7 @@ where
 		Default::default()
 	}
 
-	fn generate_chunk_name_node(
-		&self,
-		import:&CallExpr,
-		prefix:Option<String>,
-	) -> Expr {
+	fn generate_chunk_name_node(&self, import:&CallExpr, prefix:Option<String>) -> Expr {
 		let import_arg = get_import_arg(import);
 
 		if let Expr::Tpl(import_arg) = import_arg {
@@ -569,11 +500,7 @@ where
 							.iter()
 							.enumerate()
 							.map(|(idx, quasi)| {
-								self.transform_quasi(
-									quasi,
-									idx == 0,
-									import_arg.quasis.len() == 1,
-								)
+								self.transform_quasi(quasi, idx == 0, import_arg.quasis.len() == 1)
 							})
 							.collect(),
 					})
@@ -604,12 +531,7 @@ where
 		})
 	}
 
-	fn transform_quasi(
-		&self,
-		quasi:&TplElement,
-		first:bool,
-		single:bool,
-	) -> TplElement {
+	fn transform_quasi(&self, quasi:&TplElement, first:bool, single:bool) -> TplElement {
 		TplElement {
 			span:quasi.span,
 			tail:quasi.tail,
@@ -670,9 +592,7 @@ where
 			.iter()
 			.skip(1)
 			.cloned()
-			.fold(node.exprs[0].clone(), |r, p| {
-				Box::new(r.make_bin(op!(bin, "+"), *p))
-			})
+			.fold(node.exprs[0].clone(), |r, p| Box::new(r.make_bin(op!(bin, "+"), *p)))
 	}
 }
 
@@ -687,8 +607,7 @@ where
 					match specifier {
 						ImportSpecifier::Default(default_spec) => {
 							if signature.is_default_specifier() {
-								self.specifiers
-									.insert(default_spec.local.sym.clone());
+								self.specifiers.insert(default_spec.local.sym.clone());
 							}
 						},
 						ImportSpecifier::Named(named_specifier) => {
@@ -696,15 +615,12 @@ where
 								&named_specifier.imported
 							{
 								if imported.sym == signature.name {
-									self.specifiers.insert(
-										named_specifier.local.sym.clone(),
-									);
+									self.specifiers.insert(named_specifier.local.sym.clone());
 									return;
 								}
 							}
 							if named_specifier.local.sym == signature.name {
-								self.specifiers
-									.insert(named_specifier.local.sym.clone());
+								self.specifiers.insert(named_specifier.local.sym.clone());
 							}
 						},
 						_ => (),
@@ -771,10 +687,7 @@ where
 				&import,
 				&Expr::Fn(FnExpr { ident:None, function:m.function.take() }),
 			);
-			*n = Prop::KeyValue(KeyValueProp {
-				key:m.key.take(),
-				value:Box::new(object),
-			});
+			*n = Prop::KeyValue(KeyValueProp { key:m.key.take(), value:Box::new(object) });
 		}
 	}
 }
@@ -790,8 +703,8 @@ impl Visit for ImportFinder {
 			Callee::Import(..) => {
 				if self.res.is_some() {
 					panic!(
-						"loadable: multiple import calls inside `loadable()` \
-						 function are not supported."
+						"loadable: multiple import calls inside `loadable()` function are not \
+						 supported."
 					);
 				}
 				self.res = Some(call.clone());
@@ -810,9 +723,7 @@ fn clone_params(e:&Expr) -> Vec<Param> {
 			f.params
 				.iter()
 				.cloned()
-				.map(|pat| {
-					Param { span:DUMMY_SP, pat, decorators:Default::default() }
-				})
+				.map(|pat| Param { span:DUMMY_SP, pat, decorators:Default::default() })
 				.collect()
 		},
 		_ => Default::default(),
@@ -826,9 +737,7 @@ pub struct Signature {
 }
 
 impl Default for Signature {
-	fn default() -> Self {
-		Signature { name:"default".into(), from:"@loadable/component".into() }
-	}
+	fn default() -> Self { Signature { name:"default".into(), from:"@loadable/component".into() } }
 }
 
 impl Signature {
@@ -845,9 +754,7 @@ struct PluginConfig {
 	signatures:Vec<Signature>,
 }
 
-fn default_signatures() -> Vec<Signature> {
-	vec![Signature::default(), Signature::default_lazy()]
-}
+fn default_signatures() -> Vec<Signature> { vec![Signature::default(), Signature::default_lazy()] }
 
 impl Default for PluginConfig {
 	fn default() -> Self { Self { signatures:default_signatures() } }
@@ -877,10 +784,7 @@ mod tests {
 		);
 		assert_eq!(
 			config.signatures,
-			vec![Signature {
-				from:"myLoadableWrapper".into(),
-				name:"lazy".into()
-			}]
+			vec![Signature { from:"myLoadableWrapper".into(), name:"lazy".into() }]
 		)
 	}
 }

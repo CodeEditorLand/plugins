@@ -8,51 +8,45 @@ use swc_ecma_visit::{as_folder, noop_visit_mut_type, Fold, VisitMut, VisitMutWit
 
 use crate::utils::State;
 
-pub fn pure_annotation<C>(comments: C, state: Rc<RefCell<State>>) -> impl Fold + VisitMut
+pub fn pure_annotation<C>(comments:C, state:Rc<RefCell<State>>) -> impl Fold + VisitMut
 where
-    C: Comments,
-{
-    as_folder(PureAnnotation { comments, state })
+	C: Comments, {
+	as_folder(PureAnnotation { comments, state })
 }
 
 #[derive(Debug)]
 struct PureAnnotation<C>
 where
-    C: Comments,
-{
-    comments: C,
-    state: Rc<RefCell<State>>,
+	C: Comments, {
+	comments:C,
+	state:Rc<RefCell<State>>,
 }
 
 impl<C> VisitMut for PureAnnotation<C>
 where
-    C: Comments,
+	C: Comments,
 {
-    noop_visit_mut_type!();
+	noop_visit_mut_type!();
 
-    fn visit_mut_expr(&mut self, expr: &mut Expr) {
-        expr.visit_mut_children_with(self);
+	fn visit_mut_expr(&mut self, expr:&mut Expr) {
+		expr.visit_mut_children_with(self);
 
-        let (callee_or_tag, span) = match expr {
-            Expr::Call(CallExpr {
-                span,
-                callee: Callee::Expr(callee),
-                ..
-            }) => (callee, span),
-            Expr::TaggedTpl(TaggedTpl { span, tag, .. }) => (tag, span),
-            _ => return,
-        };
-        if !self.state.borrow().is_styled(callee_or_tag)
-            && !self.state.borrow().is_pure_helper(callee_or_tag)
-        {
-            return;
-        }
+		let (callee_or_tag, span) = match expr {
+			Expr::Call(CallExpr { span, callee: Callee::Expr(callee), .. }) => (callee, span),
+			Expr::TaggedTpl(TaggedTpl { span, tag, .. }) => (tag, span),
+			_ => return,
+		};
+		if !self.state.borrow().is_styled(callee_or_tag)
+			&& !self.state.borrow().is_pure_helper(callee_or_tag)
+		{
+			return;
+		}
 
-        if span.is_dummy_ignoring_cmt() {
-            *span = Span::dummy_with_cmt();
-        }
-        if !self.comments.has_flag(span.lo, "PURE") {
-            self.comments.add_pure_comment(span.lo);
-        }
-    }
+		if span.is_dummy_ignoring_cmt() {
+			*span = Span::dummy_with_cmt();
+		}
+		if !self.comments.has_flag(span.lo, "PURE") {
+			self.comments.add_pure_comment(span.lo);
+		}
+	}
 }

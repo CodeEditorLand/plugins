@@ -9,13 +9,8 @@ use swc_ecma_utils::{prepend_stmts, StmtLike};
 use swc_ecma_visit::{noop_visit_mut_type, VisitMut, VisitMutWith};
 use swc_plugin_macro::plugin_transform;
 
-static HOIST_METHODS:phf::Set<&str> = phf_set![
-	"mock",
-	"unmock",
-	"enableAutomock",
-	"disableAutomock",
-	"deepUnmock"
-];
+static HOIST_METHODS:phf::Set<&str> =
+	phf_set!["mock", "unmock", "enableAutomock", "disableAutomock", "deepUnmock"];
 
 #[plugin_transform]
 fn jest(mut program:Program, _:TransformPluginProgramMetadata) -> Program {
@@ -48,10 +43,7 @@ impl Jest {
 					match &stmt {
 						Stmt::Expr(ExprStmt { expr, .. }) => {
 							match &**expr {
-								Expr::Call(CallExpr {
-									callee: Callee::Expr(callee),
-									..
-								}) => {
+								Expr::Call(CallExpr { callee: Callee::Expr(callee), .. }) => {
 									match &**callee {
 										Expr::Member(
 											callee @ MemberExpr {
@@ -60,24 +52,12 @@ impl Jest {
 											},
 										) => {
 											match &*callee.obj {
-												Expr::Ident(i)
-													if i.sym == *"jest" =>
-												{
+												Expr::Ident(i) if i.sym == *"jest" => {
 													match prop {
-														_ if HOIST_METHODS
-															.contains(
-																&*prop.sym,
-															) =>
-														{
-															hoisted.push(
-																T::from(stmt),
-															);
+														_ if HOIST_METHODS.contains(&*prop.sym) => {
+															hoisted.push(T::from(stmt));
 														},
-														_ => {
-															new.push(T::from(
-																stmt,
-															))
-														},
+														_ => new.push(T::from(stmt)),
 													}
 												},
 												_ => new.push(T::from(stmt)),
@@ -106,9 +86,7 @@ impl Jest {
 impl VisitMut for Jest {
 	noop_visit_mut_type!();
 
-	fn visit_mut_stmts(&mut self, stmts:&mut Vec<Stmt>) {
-		self.visit_mut_stmt_like(stmts)
-	}
+	fn visit_mut_stmts(&mut self, stmts:&mut Vec<Stmt>) { self.visit_mut_stmt_like(stmts) }
 
 	fn visit_mut_module_items(&mut self, items:&mut Vec<ModuleItem>) {
 		self.visit_mut_stmt_like(items)

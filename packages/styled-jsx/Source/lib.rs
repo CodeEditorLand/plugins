@@ -9,10 +9,7 @@ use swc_core::{
 };
 
 #[plugin_transform]
-fn styled_jsx_plugin(
-	program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn styled_jsx_plugin(program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<Config>(
 		&data
 			.get_transform_plugin_config()
@@ -23,10 +20,5 @@ fn styled_jsx_plugin(
 	// TODO(kdy1): This is wrong, but it does not use cm
 	let cm = Lrc::new(SourceMap::default());
 
-	program.fold_with(&mut visitor::styled_jsx(
-		cm,
-		FileName::Anon,
-		config,
-		Default::default(),
-	))
+	program.fold_with(&mut visitor::styled_jsx(cm, FileName::Anon, config, Default::default()))
 }

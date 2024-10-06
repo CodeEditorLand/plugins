@@ -15,10 +15,7 @@ use swc_core::{
 };
 
 #[plugin_transform]
-fn styled_components(
-	mut program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn styled_components(mut program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<Config>(
 		&data
 			.get_transform_plugin_config()
@@ -26,22 +23,17 @@ fn styled_components(
 	)
 	.expect("invalid config for styled-components");
 
-	let file_name = Arc::new(
-		match data.get_context(&TransformPluginMetadataContextKind::Filename) {
+	let file_name =
+		Arc::new(match data.get_context(&TransformPluginMetadataContextKind::Filename) {
 			Some(s) => FileName::Real(s.into()),
 			None => FileName::Anon,
-		},
-	);
+		});
 
 	let pos = data.source_map.lookup_char_pos(program.span().lo);
 	let hash = pos.file.src_hash;
 
-	let mut pass = styled_components::styled_components(
-		file_name,
-		hash,
-		config,
-		PluginCommentsProxy,
-	);
+	let mut pass =
+		styled_components::styled_components(file_name, hash, config, PluginCommentsProxy);
 
 	program.visit_mut_with(&mut pass);
 

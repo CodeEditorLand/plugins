@@ -1,21 +1,12 @@
 use std::path::PathBuf;
 
 use serde::Deserialize;
-use swc_common::{
-	plugin::metadata::TransformPluginMetadataContextKind,
-	FileName,
-};
+use swc_common::{plugin::metadata::TransformPluginMetadataContextKind, FileName};
 use swc_core::{
 	ecma::{ast::Program, visit::FoldWith},
 	plugin::{plugin_transform, proxies::TransformPluginProgramMetadata},
 };
-use swc_relay::{
-	relay,
-	Config,
-	OutputFileExtension,
-	ProjectConfig,
-	RelayLanguageConfig,
-};
+use swc_relay::{relay, Config, OutputFileExtension, ProjectConfig, RelayLanguageConfig};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -39,10 +30,7 @@ struct WasmConfig {
 }
 
 #[plugin_transform]
-fn relay_plugin_transform(
-	program:Program,
-	metadata:TransformPluginProgramMetadata,
-) -> Program {
+fn relay_plugin_transform(program:Program, metadata:TransformPluginProgramMetadata) -> Program {
 	let filename = if let Some(filename) =
 		metadata.get_context(&TransformPluginMetadataContextKind::Filename)
 	{
@@ -72,13 +60,7 @@ fn relay_plugin_transform(
 		output_file_extension:plugin_config.output_file_extension,
 	};
 
-	let mut relay = relay(
-		config.into(),
-		filename,
-		root_dir,
-		None,
-		Some(metadata.unresolved_mark),
-	);
+	let mut relay = relay(config.into(), filename, root_dir, None, Some(metadata.unresolved_mark));
 
 	program.fold_with(&mut relay)
 }

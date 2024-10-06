@@ -10,10 +10,7 @@ use swc_core::{
 };
 
 #[plugin_transform]
-fn swc_confidential_plugin(
-	mut program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn swc_confidential_plugin(mut program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<swc_confidential::Config>(
 		&data
 			.get_transform_plugin_config()
@@ -21,10 +18,7 @@ fn swc_confidential_plugin(
 	)
 	.expect("invalid config for swc-confidential");
 
-	program.visit_mut_with(&mut swc_confidential::swc_confidential(
-		config,
-		PluginCommentsProxy,
-	));
+	program.visit_mut_with(&mut swc_confidential::swc_confidential(config, PluginCommentsProxy));
 
 	program
 }

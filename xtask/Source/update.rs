@@ -22,10 +22,7 @@ fn get_swc_crates() -> Result<Vec<String>> {
 	Ok(md
 		.packages
 		.iter()
-		.filter(|p| {
-			p.repository.as_deref()
-				== Some("https://github.com/swc-project/swc.git")
-		})
+		.filter(|p| p.repository.as_deref() == Some("https://github.com/swc-project/swc.git"))
 		.map(|p| p.name.clone())
 		.collect::<Vec<_>>())
 }

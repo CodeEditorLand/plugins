@@ -10,10 +10,7 @@ use swc_core::{
 };
 
 #[plugin_transform]
-fn swc_magic_plugin(
-	mut program:Program,
-	data:TransformPluginProgramMetadata,
-) -> Program {
+fn swc_magic_plugin(mut program:Program, data:TransformPluginProgramMetadata) -> Program {
 	let config = serde_json::from_str::<swc_magic::Config>(
 		&data
 			.get_transform_plugin_config()
@@ -23,11 +20,7 @@ fn swc_magic_plugin(
 
 	let unresolved_mark = data.unresolved_mark;
 
-	program.visit_mut_with(&mut swc_magic::swc_magic(
-		unresolved_mark,
-		config,
-		PluginCommentsProxy,
-	));
+	program.visit_mut_with(&mut swc_magic::swc_magic(unresolved_mark, config, PluginCommentsProxy));
 
 	program
 }
