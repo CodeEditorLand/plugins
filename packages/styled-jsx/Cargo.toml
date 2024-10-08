@@ -2,15 +2,17 @@
 
 description = "SWC Plugin for styled-jsx"
 
-authors = { workspace = true }
-edition = { workspace = true }
-homepage = { workspace = true }
-license = { workspace = true }
-name = "swc_plugin_styled_jsx"
-publish = false
-repository = { workspace = true }
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+license      = { workspace = true }
+name         = "swc_plugin_styled_jsx"
+publish      = false
+repository   = { workspace = true }
 rust-version = { workspace = true }
-version = "0.20.4"
+version      = "0.20.4"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -19,20 +21,20 @@ crate-type = ["cdylib", "rlib"]
 custom_transform = ["swc_common/concurrent"]
 
 [dependencies]
-anyhow = { workspace = true }
-serde_json = { workspace = true }
-styled_jsx = { path = "./transform" }
-swc_atoms = { workspace = true }
-swc_common = { workspace = true }
-swc_core = { workspace = true, features = ["ecma_plugin_transform"] }
-swc_ecma_ast = { workspace = true }
+anyhow            = { workspace = true }
+serde_json        = { workspace = true }
+styled_jsx        = { path = "./transform" }
+swc_atoms         = { workspace = true }
+swc_common        = { workspace = true }
+swc_core          = { workspace = true, features = ["ecma_plugin_transform"] }
+swc_ecma_ast      = { workspace = true }
 swc_ecma_minifier = { workspace = true }
-swc_ecma_parser = { workspace = true }
-swc_ecma_utils = { workspace = true }
-swc_ecma_visit = { workspace = true }
-swc_plugin_macro = { workspace = true }
-tracing = { workspace = true, features = ["release_max_level_off"] }
+swc_ecma_parser   = { workspace = true }
+swc_ecma_utils    = { workspace = true }
+swc_ecma_visit    = { workspace = true }
+swc_plugin_macro  = { workspace = true }
+tracing           = { workspace = true, features = ["release_max_level_off"] }
 
 [dev-dependencies]
 swc_ecma_transforms_testing = { workspace = true }
-testing = { workspace = true }
+testing                     = { workspace = true }

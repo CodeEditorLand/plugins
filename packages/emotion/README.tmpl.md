@@ -4,8 +4,7 @@ The official plugin for emotion css-in-js library.
 
 ## Configuration
 
-The plugin uses the same config as described in
-[Next emotion documentation](https://nextjs.org/docs/advanced-features/compiler#emotion).
+The plugin uses the same config as described in [Next emotion documentation](https://nextjs.org/docs/advanced-features/compiler#emotion).
 
 ```js
 {
@@ -31,7 +30,6 @@ The plugin uses the same config as described in
 
 ## Credit
 
-Source code for plugin itself (not transforms) are copied from
-https://github.com/IvanRodriCalleja/emotion-swc-plugin
+Source code for plugin itself (not transforms) are copied from https://github.com/IvanRodriCalleja/emotion-swc-plugin
 
 ${CHANGELOG}

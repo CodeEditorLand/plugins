@@ -1,28 +1,31 @@
 [package]
 description = "styled-components plugin for https://swc.rs"
 
-authors = { workspace = true }
-edition = { workspace = true }
-homepage = { workspace = true }
-license = { workspace = true }
-name = "swc_plugin_styled_components"
-publish = false
-repository = { workspace = true }
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+license      = { workspace = true }
+name         = "swc_plugin_styled_components"
+publish      = false
+repository   = { workspace = true }
 rust-version = { workspace = true }
-version = "0.40.4"
+version      = "0.40.4"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
+serde             = { workspace = true, features = ["derive"] }
+serde_json        = { workspace = true }
 styled_components = { path = "./transform" }
-swc_atoms = { workspace = true }
-swc_common = { workspace = true, features = ["concurrent"] }
-swc_core = { workspace = true, features = ["ecma_plugin_transform"] }
-swc_ecma_ast = { workspace = true }
-swc_ecma_utils = { workspace = true }
-swc_ecma_visit = { workspace = true }
-swc_plugin_macro = { workspace = true }
-tracing = { workspace = true, features = ["release_max_level_off"] }
+swc_atoms         = { workspace = true }
+swc_common        = { workspace = true, features = ["concurrent"] }
+swc_core          = { workspace = true, features = ["ecma_plugin_transform"] }
+swc_ecma_ast      = { workspace = true }
+swc_ecma_utils    = { workspace = true }
+swc_ecma_visit    = { workspace = true }
+swc_plugin_macro  = { workspace = true }
+tracing           = { workspace = true, features = ["release_max_level_off"] }

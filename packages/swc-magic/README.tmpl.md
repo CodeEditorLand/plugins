@@ -6,11 +6,11 @@
 
 ```json
 {
-	"jsc": {
-		"experimental": {
-			"plugins": ["@swc/plugin-swc-magic"]
-		}
-	}
+  "jsc": {
+    "experimental": {
+      "plugins": ["@swc/plugin-swc-magic"]
+    }
+  }
 }
 ```
 
