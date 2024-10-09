@@ -7,19 +7,19 @@ mod update;
 #[derive(Debug, Parser)]
 
 struct CliArgs {
-    #[clap(subcommand)]
-    cmd: Cmd,
+	#[clap(subcommand)]
+	cmd:Cmd,
 }
 
 #[derive(Debug, Subcommand)]
 enum Cmd {
-    Update(Update),
+	Update(Update),
 }
 
 fn main() -> Result<()> {
-    let args = CliArgs::parse();
+	let args = CliArgs::parse();
 
-    match args.cmd {
-        Cmd::Update(update) => update.run(),
-    }
+	match args.cmd {
+		Cmd::Update(update) => update.run(),
+	}
 }

@@ -8,7 +8,8 @@ npm install --save-dev @swc/plugin-relay @swc/core
 
 ### Example
 
-The below shows how to configure `@swc/plugin-relay` and pass the options to Webpack:
+The below shows how to configure `@swc/plugin-relay` and pass the options to
+Webpack:
 
 Create an `.swcrc.js` file like the below:
 
@@ -16,46 +17,46 @@ Create an `.swcrc.js` file like the below:
 // .swcrc.js
 
 module.exports = {
-  jsc: {
-    experimental: {
-      plugins: [
-        [
-          "@swc/plugin-relay",
-          {
-            rootDir: __dirname,
-            artifactDirectory: "src/__generated__",
-            language: "typescript",
-            eagerEsModules: true,
-          },
-        ],
-        // Or if you want to use multiple projects
-        [
-          "@swc/plugin-relay",
-          {
-            projects: [
-              {
-                rootDir: path.resolve(__dirname, '../project1'),
-              },
-              {
-                rootDir: path.resolve(__dirname, '../project2'),
-              }
-            ],
-            language: "typescript",
-            eagerEsModules: true,
-          },
-        ],
-      ],
-    },
-    parser: {
-      syntax: "typescript",
-      tsx: true,
-    },
-    transform: {
-      react: {
-        runtime: "automatic",
-      },
-    },
-  },
+	jsc: {
+		experimental: {
+			plugins: [
+				[
+					"@swc/plugin-relay",
+					{
+						rootDir: __dirname,
+						artifactDirectory: "src/__generated__",
+						language: "typescript",
+						eagerEsModules: true,
+					},
+				],
+				// Or if you want to use multiple projects
+				[
+					"@swc/plugin-relay",
+					{
+						projects: [
+							{
+								rootDir: path.resolve(__dirname, "../project1"),
+							},
+							{
+								rootDir: path.resolve(__dirname, "../project2"),
+							},
+						],
+						language: "typescript",
+						eagerEsModules: true,
+					},
+				],
+			],
+		},
+		parser: {
+			syntax: "typescript",
+			tsx: true,
+		},
+		transform: {
+			react: {
+				runtime: "automatic",
+			},
+		},
+	},
 };
 ```
 
@@ -78,12 +79,15 @@ const swcConfig = require("./.swcrc.js")
 }
 ```
 
-> Note: We're using a `.swcrc.js` file extension up above and importing the config directly because Relay needs access to `__dirname`, which can't be derived from the default JSON parsed from `.swcrc`.
+> Note: We're using a `.swcrc.js` file extension up above and importing the
+> config directly because Relay needs access to `__dirname`, which can't be
+> derived from the default JSON parsed from `.swcrc`.
 
 #### Output import paths
 
-By default, `@swc/plugin-relay` will transpile import paths based on the `language` option.
-You can use `outputFileExtension` to change the file extension of the generated import paths.
+By default, `@swc/plugin-relay` will transpile import paths based on the
+`language` option. You can use `outputFileExtension` to change the file
+extension of the generated import paths.
 
 ```js
 plugins: [
@@ -100,6 +104,7 @@ plugins: [
 ],
 ```
 
-In this example typescript graphql files will output transpiled import path of `javascript` ending with `.js`.
+In this example typescript graphql files will output transpiled import path of
+`javascript` ending with `.js`.
 
 ${CHANGELOG}
