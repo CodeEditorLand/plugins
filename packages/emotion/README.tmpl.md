@@ -5,7 +5,7 @@ The official plugin for emotion css-in-js library.
 ## Configuration
 
 The plugin uses the same config as described in
-[Next emotion documentation](https://nextjs.org/docs/advanced-features/compiler#emotion).
+[`Next emotion documentation`](https://nextjs.org/docs/advanced-features/compiler#emotion).
 
 ```js
 {

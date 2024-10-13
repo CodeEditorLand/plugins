@@ -1,7 +1,7 @@
 # @swc/plugin-prefresh
 
 The SWC implementation of the
-[prefresh babel plugin](https://github.com/preactjs/prefresh/tree/main/packages/babel).
+[`prefresh babel plugin`](https://github.com/preactjs/prefresh/tree/main/packages/babel).
 
 ## Usage
 
