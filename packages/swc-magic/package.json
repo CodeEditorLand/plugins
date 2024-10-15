@@ -1,12 +1,24 @@
 {
-	"dependencies": {
-		"@swc/counter": "0.1.3"
-	},
-	"description": "SWC plugin for swc-magic",
-	"main": "swc_plugin_swc_magic.wasm",
-	"name": "@swc/plugin-swc-magic",
-	"preferUnplugged": true,
-	"scripts": {
-		"prepack": "cargo build --release -p swc_plugin_swc_magic --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_swc_magic.wasm ."
-	}
+  "name": "@swc/plugin-swc-magic",
+  "version": "3.0.3",
+  "description": "SWC plugin for swc-magic",
+  "main": "swc_plugin_swc_magic.wasm",
+  "scripts": {
+    "prepack": "cargo build --release -p swc_plugin_swc_magic --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_swc_magic.wasm ."
+  },
+  "homepage": "https://swc.rs",
+  "repository": {
+    "type": "git",
+    "url": "+https://github.com/swc-project/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swc-project/plugins/issues"
+  },
+  "author": "강동윤 <kdy1997.dev@gmail.com>",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "preferUnplugged": true,
+  "dependencies": {
+    "@swc/counter": "^0.1.3"
+  }
 }
