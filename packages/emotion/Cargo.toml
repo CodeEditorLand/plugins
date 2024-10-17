@@ -12,6 +12,7 @@ version = "0.18.5"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+path = "Source/lib.rs"
 
 [dependencies]
 serde = { workspace = true }

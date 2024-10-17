@@ -14,6 +14,7 @@ version = "0.19.4"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+path = "Source/lib.rs"
 
 [dependencies]
 remove_console = { path = "./transform" }
