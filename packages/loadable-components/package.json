@@ -1,12 +1,12 @@
 {
-	"name": "@swc/plugin-loadable-components",
-	"description": "SWC plugin for `@loadable/components`",
-	"main": "swc_plugin_loadable_components.wasm",
-	"scripts": {
-		"prepack": "cargo build --release -p swc_plugin_loadable_components --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_loadable_components.wasm ."
-	},
 	"dependencies": {
 		"@swc/counter": "0.1.3"
 	},
-	"preferUnplugged": true
+	"description": "SWC plugin for `@loadable/components`",
+	"main": "swc_plugin_loadable_components.wasm",
+	"name": "@swc/plugin-loadable-components",
+	"preferUnplugged": true,
+	"scripts": {
+		"prepack": "cargo build --release -p swc_plugin_loadable_components --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_loadable_components.wasm ."
+	}
 }
