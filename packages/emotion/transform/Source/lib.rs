@@ -6,7 +6,6 @@ use std::{
 
 use base64::Engine;
 use fxhash::FxHashMap;
-use import_map::ImportMap;
 use once_cell::sync::Lazy;
 use regex::{Regex, RegexBuilder};
 use serde::{Deserialize, Serialize};
@@ -17,12 +16,14 @@ use swc_ecma_ast::{
     ArrayLit, CallExpr, Callee, ClassDecl, ClassMethod, ClassProp, Expr, ExprOrSpread, FnDecl, Id,
     Ident, IdentName, ImportDecl, ImportSpecifier, JSXAttr, JSXAttrName, JSXAttrOrSpread,
     JSXAttrValue, JSXElement, JSXElementName, JSXExpr, JSXExprContainer, JSXObject, KeyValueProp,
-    MemberProp, MethodProp, ModuleExportName, ObjectLit, Pat, Prop, PropName, PropOrSpread,
+    MemberProp, MethodProp, ModuleExportName, ObjectLit, Pass, Pat, Prop, PropName, PropOrSpread,
     SourceMapperExt, SpreadElement, Tpl, VarDeclarator,
 };
 use swc_ecma_utils::ExprFactory;
-use swc_ecma_visit::{Fold, FoldWith};
+use swc_ecma_visit::{fold_pass, Fold, FoldWith};
 use swc_trace_macro::swc_trace;
+
+pub use crate::import_map::*;
 
 mod import_map;
 
@@ -166,8 +167,14 @@ pub fn emotion<C: Comments>(
     src_file_hash: u32,
     cm: Arc<SourceMapperDyn>,
     comments: C,
-) -> impl Fold {
-    EmotionTransformer::new(emotion_options, path, src_file_hash, cm, comments)
+) -> impl Pass {
+    fold_pass(EmotionTransformer::new(
+        emotion_options,
+        path,
+        src_file_hash,
+        cm,
+        comments,
+    ))
 }
 
 pub struct EmotionTransformer<C: Comments> {
