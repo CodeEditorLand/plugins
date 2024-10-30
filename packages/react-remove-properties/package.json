@@ -1,24 +1,12 @@
 {
-  "name": "@swc/plugin-react-remove-properties",
-  "version": "3.0.4",
-  "description": "SWC plugin for https://www.npmjs.com/package/babel-plugin-react-remove-properties",
-  "main": "swc_plugin_react_remove_properties.wasm",
-  "scripts": {
-    "prepack": "cargo build --release -p swc_plugin_react_remove_properties --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_react_remove_properties.wasm ."
-  },
-  "homepage": "https://swc.rs",
-  "repository": {
-    "type": "git",
-    "url": "+https://github.com/swc-project/plugins.git"
-  },
-  "bugs": {
-    "url": "https://github.com/swc-project/plugins/issues"
-  },
-  "author": "강동윤 <kdy1997.dev@gmail.com>",
-  "keywords": [],
-  "license": "Apache-2.0",
-  "preferUnplugged": true,
-  "dependencies": {
-    "@swc/counter": "^0.1.3"
-  }
+	"dependencies": {
+		"@swc/counter": "^0.1.3"
+	},
+	"description": "SWC plugin for https://www.npmjs.com/package/babel-plugin-react-remove-properties",
+	"main": "swc_plugin_react_remove_properties.wasm",
+	"name": "@swc/plugin-react-remove-properties",
+	"preferUnplugged": true,
+	"scripts": {
+		"prepack": "cargo build --release -p swc_plugin_react_remove_properties --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_react_remove_properties.wasm ."
+	}
 }
