@@ -42,7 +42,8 @@ fn report(
 ) {
     // We need :global(selector) to be parsed as a selector.
     if let ParserError::SelectorError(
-        lightningcss::error::SelectorError::UnsupportedPseudoClassOrElement(..),
+        lightningcss::error::SelectorError::UnsupportedPseudoClass(..)
+        | lightningcss::error::SelectorError::UnsupportedPseudoElement(..),
     ) = &err.kind
     {
         return;
@@ -51,7 +52,7 @@ fn report(
     let file = file_lines_cache.get_or_insert_with(|| cm.lookup_char_pos(css_span.lo));
 
     let lo = if let Some(loc) = &err.loc {
-        Some(file.file.analyze().lines[(loc.line + 1) as usize] + BytePos(loc.column))
+        Some(file.file.lines[(loc.line + 1) as usize] + BytePos(loc.column))
     } else {
         None
     };
