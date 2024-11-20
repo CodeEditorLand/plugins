@@ -1,7 +1,7 @@
 [package]
 authors = [
-  "OJ Kwon <kwon.ohjoong@gmail.com>",
-  "DongYoon Kang <kdy1997.dev@gmail.com>",
+	"OJ Kwon <kwon.ohjoong@gmail.com>",
+	"DongYoon Kang <kdy1997.dev@gmail.com>",
 ]
 description = "formatjs custom transform visitor for SWC"
 edition.workspace = true
@@ -14,13 +14,13 @@ version = "1.0.0"
 custom_transform = []
 
 [dependencies]
-base64ct                     = { workspace = true, features = ["alloc"] }
-once_cell                    = { workspace = true }
-regex                        = { workspace = true }
-serde                        = { workspace = true, features = ["derive"] }
-serde_json                   = { workspace = true }
-sha2                         = { workspace = true }
-swc_core                     = { workspace = true, features = ["common", "ecma_visit", "ecma_ast"] }
+base64ct = { workspace = true, features = ["alloc"] }
+once_cell = { workspace = true }
+regex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+swc_core = { workspace = true, features = ["common", "ecma_visit", "ecma_ast"] }
 swc_icu_messageformat_parser = { workspace = true, features = ["utf16"] }
 
 [dev-dependencies]

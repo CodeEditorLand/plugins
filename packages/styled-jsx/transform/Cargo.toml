@@ -9,8 +9,7 @@ license = { workspace = true }
 name = "styled_jsx"
 repository = { workspace = true }
 rust-version = { workspace = true }
-version      = "0.73.40"
-
+version = "0.73.40"
 
 [features]
 custom_transform = ["swc_common/concurrent"]
