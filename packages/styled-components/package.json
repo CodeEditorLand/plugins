@@ -1,12 +1,12 @@
 {
-	"name": "@swc/plugin-styled-components",
-	"description": "SWC plugin for styled-components",
-	"main": "swc_plugin_styled_components.wasm",
-	"scripts": {
-		"prepack": "cargo build --release -p swc_plugin_styled_components --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_styled_components.wasm ."
-	},
 	"dependencies": {
 		"@swc/counter": "0.1.3"
 	},
-	"preferUnplugged": true
+	"description": "SWC plugin for styled-components",
+	"main": "swc_plugin_styled_components.wasm",
+	"name": "@swc/plugin-styled-components",
+	"preferUnplugged": true,
+	"scripts": {
+		"prepack": "cargo build --release -p swc_plugin_styled_components --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_styled_components.wasm ."
+	}
 }
