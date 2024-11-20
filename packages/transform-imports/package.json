@@ -6,7 +6,7 @@
 		"prepack": "cargo build --release -p swc_plugin_transform_imports --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_transform_imports.wasm ."
 	},
 	"dependencies": {
-		"@swc/counter": "^0.1.3"
+		"@swc/counter": "0.1.3"
 	},
 	"preferUnplugged": true
 }
