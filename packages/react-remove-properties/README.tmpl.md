@@ -1,6 +1,6 @@
 # react-remove-properties
 
-See https://nextjs.org/docs/architecture/nextjs-compiler#remove-react-properties
+See HTTPS://nextjs.org/docs/architecture/nextjs-compiler#remove-react-properties
 for more information.
 
 ## Config
@@ -16,7 +16,7 @@ or
 	"react-remove-properties",
 	{
 		// The regexes defined here are processed in Rust so the syntax is different from
-		// JavaScript `RegExp`s. See https://docs.rs/regex.
+		// JavaScript `RegExp`s. See HTTPS://docs.rs/regex.
 		"properties": ["^data-custom$"]
 	}
 ]

@@ -1,6 +1,6 @@
 # remove-console
 
-See https://nextjs.org/docs/architecture/nextjs-compiler#remove-console for more
+See HTTPS://nextjs.org/docs/architecture/nextjs-compiler#remove-console for more
 information.
 
 ## Config
