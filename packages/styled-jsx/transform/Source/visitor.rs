@@ -134,35 +134,45 @@ impl Fold for StyledJSXTransformer<'_> {
         if is_styled_jsx(&el) {
             if self.visiting_styled_jsx_descendants {
                 emit_nested_error(el.span);
+
                 return el;
             }
 
             let parent_has_styled_jsx = self.has_styled_jsx;
+
             if !parent_has_styled_jsx && self.check_for_jsx_styles(Some(&el), &el.children).is_err()
             {
                 return el;
             }
+
             let el = match self.replace_jsx_style(&el) {
                 Ok(el) => el,
                 Err(_) => el,
             };
+
             if !parent_has_styled_jsx {
                 self.reset_styles_state();
             }
+
             return el;
         }
 
         if self.has_styled_jsx {
             self.visiting_styled_jsx_descendants = true;
+
             let el = el.fold_children_with(self);
+
             self.visiting_styled_jsx_descendants = false;
+
             return el;
         }
 
         if self.check_for_jsx_styles(None, &el.children).is_err() {
             return el;
         }
+
         let el = el.fold_children_with(self);
+
         self.reset_styles_state();
 
         el
@@ -171,15 +181,20 @@ impl Fold for StyledJSXTransformer<'_> {
     fn fold_jsx_fragment(&mut self, fragment: JSXFragment) -> JSXFragment {
         if self.has_styled_jsx {
             self.visiting_styled_jsx_descendants = true;
+
             let fragment = fragment.fold_children_with(self);
+
             self.visiting_styled_jsx_descendants = false;
+
             return fragment;
         }
 
         if self.check_for_jsx_styles(None, &fragment.children).is_err() {
             return fragment;
         };
+
         let fragment = fragment.fold_children_with(self);
+
         self.reset_styles_state();
 
         fragment
@@ -188,6 +203,7 @@ impl Fold for StyledJSXTransformer<'_> {
     fn fold_jsx_opening_element(&mut self, mut el: JSXOpeningElement) -> JSXOpeningElement {
         if !self.has_styled_jsx {
             el = el.fold_children_with(self);
+
             return el;
         }
 
@@ -221,11 +237,14 @@ impl Fold for StyledJSXTransformer<'_> {
                             span: DUMMY_SP,
                         })),
                     });
+
                     el.attrs.push(class_name_attr);
                 }
+
                 if let Some(existing_spread_index) = existing_spread_index {
                     el.attrs.remove(existing_spread_index);
                 }
+
                 if let Some(existing_index) = existing_index {
                     el.attrs.remove(existing_index);
                 }
@@ -241,15 +260,18 @@ impl Fold for StyledJSXTransformer<'_> {
             ref specifiers,
             ..
         } = decl;
+
         if &src.value == "styled-jsx/css" {
             for specifier in specifiers {
                 match specifier {
                     ImportSpecifier::Default(default_specifier) => {
                         self.external_bindings.push(default_specifier.local.to_id())
                     }
+
                     ImportSpecifier::Named(named_specifier) => {
                         self.external_bindings.push(named_specifier.local.to_id())
                     }
+
                     _ => {}
                 }
             }
@@ -260,6 +282,7 @@ impl Fold for StyledJSXTransformer<'_> {
 
     fn fold_expr(&mut self, expr: Expr) -> Expr {
         let expr = expr.fold_children_with(self);
+
         match expr {
             Expr::TaggedTpl(tagged_tpl) => match &*tagged_tpl.tag {
                 Expr::Ident(identifier) => {
@@ -272,6 +295,7 @@ impl Fold for StyledJSXTransformer<'_> {
                         Expr::TaggedTpl(tagged_tpl)
                     }
                 }
+
                 Expr::Member(MemberExpr {
                     obj: boxed_ident, ..
                 }) => {
@@ -288,6 +312,7 @@ impl Fold for StyledJSXTransformer<'_> {
                         Expr::TaggedTpl(tagged_tpl)
                     }
                 }
+
                 _ => Expr::TaggedTpl(tagged_tpl),
             },
             expr => expr,
@@ -296,6 +321,7 @@ impl Fold for StyledJSXTransformer<'_> {
 
     fn fold_var_declarator(&mut self, declarator: VarDeclarator) -> VarDeclarator {
         let declarator = declarator.fold_children_with(self);
+
         if let Some(external_hash) = &self.external_hash.take() {
             if let Pat::Ident(BindingIdent {
                 id: Ident { ctxt, sym, .. },
@@ -305,40 +331,51 @@ impl Fold for StyledJSXTransformer<'_> {
                 self.add_hash = Some(((sym.clone(), *ctxt), external_hash.clone()));
             }
         }
+
         declarator
     }
 
     fn fold_export_default_expr(&mut self, default_expr: ExportDefaultExpr) -> ExportDefaultExpr {
         let default_expr = default_expr.fold_children_with(self);
+
         if let Some(external_hash) = &self.external_hash.take() {
             let default_ident = private_ident!("_defaultExport");
+
             self.add_hash = Some((default_ident.to_id(), external_hash.clone()));
+
             self.add_default_decl = Some((default_ident.to_id(), *default_expr.expr));
+
             return ExportDefaultExpr {
                 expr: Box::new(Expr::Ident(default_ident)),
                 span: DUMMY_SP,
             };
         }
+
         default_expr
     }
 
     fn fold_block_stmt(&mut self, mut block: BlockStmt) -> BlockStmt {
         let mut new_stmts = vec![];
+
         for stmt in block.stmts {
             new_stmts.push(stmt.fold_children_with(self));
+
             if let Some(add_hash) = self.add_hash.take() {
                 new_stmts.push(add_hash_statement(add_hash));
             }
         }
 
         block.stmts = new_stmts;
+
         block
     }
 
     fn fold_module_items(&mut self, items: Vec<ModuleItem>) -> Vec<ModuleItem> {
         let mut new_items = vec![];
+
         for item in items {
             let new_item = item.fold_children_with(self);
+
             if let Some((default_ident, default_expr)) = &self.add_default_decl {
                 new_items.push(ModuleItem::Stmt(Stmt::Decl(Decl::Var(Box::new(VarDecl {
                     kind: VarDeclKind::Const,
@@ -359,14 +396,18 @@ impl Fold for StyledJSXTransformer<'_> {
                     }],
                     ..Default::default()
                 })))));
+
                 self.add_default_decl = None;
+
                 if let Some(add_hash) = self.add_hash.take() {
                     new_items.push(ModuleItem::Stmt(add_hash_statement(add_hash)));
                 }
             }
+
             if !is_styled_css_import(&new_item) {
                 new_items.push(new_item);
             }
+
             if let Some(add_hash) = self.add_hash.take() {
                 new_items.push(ModuleItem::Stmt(add_hash_statement(add_hash)));
             }
@@ -386,6 +427,7 @@ impl Fold for StyledJSXTransformer<'_> {
         if self.in_function_params {
             self.nearest_scope_bindings.insert(node.id.to_id());
         }
+
         node
     }
 
@@ -393,53 +435,81 @@ impl Fold for StyledJSXTransformer<'_> {
         if self.in_function_params {
             self.nearest_scope_bindings.insert(node.key.to_id());
         }
+
         node
     }
 
     fn fold_function(&mut self, mut func: Function) -> Function {
         self.func_scope_level += 1;
+
         let surrounding_scope_bindings = take(&mut self.nearest_scope_bindings);
+
         self.in_function_params = true;
+
         let mut new_params = vec![];
+
         for param in func.params {
             new_params.push(param.fold_with(self));
         }
+
         func.params = new_params;
+
         self.in_function_params = false;
+
         self.nearest_scope_bindings.extend(collect_decls(&func));
+
         func.body = func.body.fold_with(self);
+
         self.nearest_scope_bindings = surrounding_scope_bindings;
+
         self.func_scope_level -= 1;
+
         func
     }
 
     fn fold_arrow_expr(&mut self, mut func: ArrowExpr) -> ArrowExpr {
         self.func_scope_level += 1;
+
         let surrounding_scope_bindings = take(&mut self.nearest_scope_bindings);
+
         self.in_function_params = true;
+
         let mut new_params = vec![];
+
         for param in func.params {
             new_params.push(param.fold_with(self));
         }
+
         func.params = new_params;
+
         self.in_function_params = false;
+
         self.nearest_scope_bindings.extend(collect_decls(&func));
+
         func.body = func.body.fold_with(self);
+
         self.nearest_scope_bindings = surrounding_scope_bindings;
+
         self.func_scope_level -= 1;
+
         func
     }
 
     fn fold_module(&mut self, module: Module) -> Module {
         self.bindings = collect_decls(&module);
+
         self.evaluator = Some(Evaluator::new(module.clone(), Marks::new()));
+
         self.style_import_name = Some(get_usable_import_specifier(&module.body));
+
         let module = module.fold_children_with(self);
+
         if self.file_has_css_resolve
             && self.file_name.is_some()
             && self.file_name.as_ref().unwrap().ends_with(".ts")
         {
             let file_name: &str = self.file_name.as_ref().unwrap();
+
             HANDLER.with(|handler| {
                 handler.err(&format!(
                     "{} uses `css.resolve`, but ends with `.ts`. The file extension needs to be \
@@ -448,6 +518,7 @@ impl Fold for StyledJSXTransformer<'_> {
                 ));
             });
         }
+
         module
     }
 }
@@ -459,11 +530,16 @@ impl StyledJSXTransformer<'_> {
         children: &[JSXElementChild],
     ) -> Result<(), Error> {
         let mut styles = vec![];
+
         let mut process_style = |el: &JSXElement| {
             self.file_has_styled_jsx = true;
+
             self.has_styled_jsx = true;
+
             let expr = get_style_expr(el)?;
+
             let style_info = self.get_jsx_style(expr, is_global(el));
+
             styles.insert(0, style_info);
 
             anyhow::Ok(())
@@ -484,8 +560,11 @@ impl StyledJSXTransformer<'_> {
         if self.has_styled_jsx {
             let (static_class_name, class_name) =
                 compute_class_names(&styles, self.style_import_name.as_ref().unwrap());
+
             self.styles = styles;
+
             self.static_class_name = static_class_name;
+
             self.class_name = class_name;
         }
 
@@ -494,18 +573,28 @@ impl StyledJSXTransformer<'_> {
 
     fn get_jsx_style(&mut self, style_expr: StyleExpr, is_global_jsx_element: bool) -> JSXStyle {
         let mut hasher = DefaultHasher::new();
+
         let css: String;
+
         let css_span: Span;
+
         let is_dynamic;
+
         let mut expressions = vec![];
+
         let mut is_expr_property = vec![];
+
         match style_expr {
             StyleExpr::Str(Str { value, span, .. }) => {
                 hasher.write(value.as_ref().as_bytes());
+
                 css = value.to_string();
+
                 css_span = *span;
+
                 is_dynamic = false;
             }
+
             StyleExpr::Tpl(
                 Tpl {
                     exprs,
@@ -516,22 +605,29 @@ impl StyledJSXTransformer<'_> {
             ) => {
                 if exprs.is_empty() {
                     hasher.write(quasis[0].raw.as_bytes());
+
                     css = quasis[0].raw.to_string();
+
                     css_span = *span;
+
                     is_dynamic = false;
                 } else {
                     drop_span(expr.clone()).hash(&mut hasher);
+
                     let mut s = String::new();
+
                     for i in 0..quasis.len() {
                         // TODO: Handle comments
 
                         let before = &*quasis[i].raw;
+
                         let before = before.trim();
 
                         let after = quasis.get(i + 1).map(|v| v.raw.trim());
 
                         let placeholder = if i == quasis.len() - 1 {
                             is_expr_property.push(false);
+
                             String::new()
                         } else if before.ends_with([';', '{'])
                             && match after {
@@ -540,25 +636,34 @@ impl StyledJSXTransformer<'_> {
                             }
                         {
                             is_expr_property.push(true);
+
                             format!("--styled-jsx-placeholder-{}__: 0", i)
                         } else {
                             is_expr_property.push(false);
+
                             format!("--styled-jsx-placeholder-{}__", i)
                         };
+
                         s.push_str(&quasis[i].raw);
+
                         s.push_str(&placeholder);
                     }
+
                     css = s;
+
                     css_span = *span;
+
                     is_dynamic = if self.func_scope_level > 0 {
                         let res = self.evaluator.as_mut().unwrap().eval(expr);
                         !matches!(res, Some(EvalResult::Lit(_)))
                     } else {
                         false
                     };
+
                     expressions.clone_from(exprs);
                 }
             }
+
             StyleExpr::Ident(ident) => {
                 return JSXStyle::External(ExternalStyle {
                     expr: Expr::Member(MemberExpr {
@@ -603,6 +708,7 @@ impl StyledJSXTransformer<'_> {
                     return true;
                 }
             }
+
             false
         });
 
@@ -634,6 +740,7 @@ impl StyledJSXTransformer<'_> {
                     self.static_class_name.as_ref(),
                 ))
             }
+
             JSXStyle::External(style) => Ok(make_external_styled_jsx_el(
                 style,
                 self.style_import_name.as_ref().unwrap(),
@@ -656,9 +763,12 @@ impl StyledJSXTransformer<'_> {
             StyleExpr::Tpl(&tagged_tpl.tpl, &Expr::Tpl(*tagged_tpl.tpl.clone())),
             false,
         );
+
         let styles = vec![style];
+
         let (static_class_name, class_name) =
             compute_class_names(&styles, self.style_import_name.as_ref().unwrap());
+
         let tag = match &*tagged_tpl.tag {
             Expr::Ident(Ident { sym, .. }) => sym.to_string(),
             Expr::Member(MemberExpr {
@@ -667,10 +777,12 @@ impl StyledJSXTransformer<'_> {
             }) => sym.to_string(),
             _ => String::from("not_styled_jsx_tag"),
         };
+
         let style = if let JSXStyle::Local(style) = &styles[0] {
             if tag != "resolve" {
                 self.external_hash = Some(hash_string(&style.hash.clone()));
             }
+
             style
         } else {
             bail!("This shouldn't happen, we already know that this is a template literal");
@@ -694,8 +806,10 @@ impl StyledJSXTransformer<'_> {
                 &self.native_config,
             )?
         };
+
         if tag == "resolve" {
             self.file_has_css_resolve = true;
+
             return Ok(Expr::Object(ObjectLit {
                 props: vec![
                     PropOrSpread::Prop(Box::new(Prop::KeyValue(KeyValueProp {
@@ -721,6 +835,7 @@ impl StyledJSXTransformer<'_> {
                 span: DUMMY_SP,
             }));
         }
+
         Ok(Expr::New(NewExpr {
             callee: Box::new(Expr::Ident(Ident {
                 sym: "String".into(),
@@ -736,8 +851,11 @@ impl StyledJSXTransformer<'_> {
 
     fn reset_styles_state(&mut self) {
         self.has_styled_jsx = false;
+
         self.static_class_name = None;
+
         self.class_name = None;
+
         self.styles = vec![];
     }
 }
@@ -770,6 +888,7 @@ fn is_styled_jsx(el: &JSXElement) -> bool {
                 return true;
             }
         }
+
         false
     })
 }
@@ -791,6 +910,7 @@ fn is_global(el: &JSXElement) -> bool {
                 return true;
             }
         }
+
         false
     })
 }
@@ -805,6 +925,7 @@ fn get_style_expr(el: &JSXElement) -> Result<StyleExpr, Error> {
                     return false;
                 }
             }
+
             true
         })
         .collect();
@@ -821,6 +942,7 @@ fn get_style_expr(el: &JSXElement) -> Result<StyleExpr, Error> {
                 )
                 .emit()
         });
+
         bail!("styled-jsx style error");
     }
 
@@ -842,6 +964,7 @@ fn get_style_expr(el: &JSXElement) -> Result<StyleExpr, Error> {
                         )
                         .emit()
                 });
+
                 bail!("wrong jsx expression container type");
             }
         });
@@ -855,14 +978,19 @@ fn get_style_expr(el: &JSXElement) -> Result<StyleExpr, Error> {
             )
             .emit()
     });
+
     bail!("next-swc compilation error");
 }
 
 fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usize>, Option<usize>) {
     let mut spreads = vec![];
+
     let mut class_name_expr = None;
+
     let mut existing_index = None;
+
     let mut existing_spread_index = None;
+
     for i in (0..el.attrs.len()).rev() {
         match &el.attrs[i] {
             JSXAttrOrSpread::JSXAttr(JSXAttr {
@@ -872,6 +1000,7 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
             }) => {
                 if sym == "className" {
                     existing_index = Some(i);
+
                     class_name_expr = match value {
                         Some(JSXAttrValue::Lit(str_lit)) => Some(Expr::Lit(str_lit.clone())),
                         Some(JSXAttrValue::JSXExprContainer(JSXExprContainer {
@@ -881,13 +1010,17 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
                         None => None,
                         _ => None,
                     };
+
                     break;
                 }
             }
+
             JSXAttrOrSpread::SpreadElement(SpreadElement { expr, .. }) => {
                 if let Expr::Object(ObjectLit { props, .. }) = &**expr {
                     let mut has_spread = false;
+
                     let mut has_class_name = false;
+
                     for j in 0..props.len() {
                         if let PropOrSpread::Prop(prop) = &props[j] {
                             if let Prop::KeyValue(KeyValueProp {
@@ -897,7 +1030,9 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
                             {
                                 if sym == "className" {
                                     has_class_name = true;
+
                                     class_name_expr = Some(*value.clone());
+
                                     if props.len() == 1 {
                                         existing_spread_index = Some(i);
                                     }
@@ -907,9 +1042,11 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
                             has_spread = true;
                         }
                     }
+
                     if has_class_name {
                         break;
                     }
+
                     if !has_spread {
                         continue;
                     }
@@ -936,6 +1073,7 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
                     ));
                 }
             }
+
             _ => {}
         };
     }
@@ -967,6 +1105,7 @@ fn get_existing_class_name(el: &JSXOpeningElement) -> (Option<Expr>, Option<usiz
 
 fn join_spreads(spreads: Vec<Expr>) -> Expr {
     let mut new_expr = spreads[0].clone();
+
     for i in spreads.iter().skip(1) {
         new_expr = Expr::Bin(BinExpr {
             op: op!("||"),
@@ -975,6 +1114,7 @@ fn join_spreads(spreads: Vec<Expr>) -> Expr {
             span: DUMMY_SP,
         })
     }
+
     new_expr
 }
 
@@ -1012,5 +1152,6 @@ fn is_styled_css_import(item: &ModuleItem) -> bool {
             return true;
         }
     }
+
     false
 }

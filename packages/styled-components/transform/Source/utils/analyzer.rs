@@ -84,6 +84,7 @@ impl Visit for Analyzer<'_> {
 
                         if is_styled {
                             self.state.styled_required = Some(name.id.to_id());
+
                             self.state.unresolved_ctxt = Some(callee.ctxt);
                         }
                     }
@@ -111,13 +112,16 @@ impl Visit for Analyzer<'_> {
                                 ModuleExportName::Str(v) => &*v.value,
                             })
                             .unwrap_or(&*s.local.sym);
+
                         self.state
                             .imported_local_named
                             .insert(imported.to_string(), s.local.to_id());
                     }
+
                     ImportSpecifier::Default(s) => {
                         self.state.imported_local_name = Some(s.local.to_id());
                     }
+
                     ImportSpecifier::Namespace(s) => {
                         self.state.imported_local_ns = Some(s.local.to_id());
                     }

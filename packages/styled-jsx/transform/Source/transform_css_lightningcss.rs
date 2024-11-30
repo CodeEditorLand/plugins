@@ -61,6 +61,7 @@ fn report(
         //
 
         let mut db = DiagnosticBuilder::new(handler, level, &err.kind.to_string());
+
         if let Some(lo) = lo {
             db.set_span(Span::new(lo, lo));
         }
@@ -120,6 +121,7 @@ pub fn transform_css(
                     .note(&format!("Input to the css parser is {}", style_info.css))
                     .emit()
             });
+
             bail!("Failed to parse css");
         }
     };
@@ -166,10 +168,14 @@ pub fn transform_css(
     }
 
     let mut parts: Vec<&str> = res.code.split("--styled-jsx-placeholder-").collect();
+
     let mut final_expressions = vec![];
+
     for i in parts.iter_mut().skip(1) {
         let (num_len, expression_index) = read_number(i, &style_info.is_expr_property);
+
         final_expressions.push(style_info.expressions[expression_index].clone());
+
         let substring = &i[(num_len + 2)..];
         *i = substring;
     }
@@ -225,12 +231,16 @@ fn reduce_substr(
     for (i, substr) in substrs.into_iter().enumerate() {
         if i == 0 {
             res.push_str(substr.as_ref());
+
             continue;
         }
+
         if predicate(&res) {
             break;
         }
+
         res.push_str(join.as_ref());
+
         res.push_str(substr.as_ref());
     }
 
@@ -287,6 +297,7 @@ impl<'i> Visitor<'i> for CssNamespace {
 
     fn visit_selector(&mut self, selector: &mut Selector<'i>) -> Result<(), Self::Error> {
         let mut new_selectors = vec![];
+
         let mut combinator = None;
 
         #[cfg(debug_assertions)]
@@ -298,6 +309,7 @@ impl<'i> Visitor<'i> for CssNamespace {
         .entered();
 
         let mut iter = selector.iter();
+
         loop {
             #[cfg(debug_assertions)]
             let _tracing = tracing::span!(
@@ -323,6 +335,7 @@ impl<'i> Visitor<'i> for CssNamespace {
 
                     new_selectors.push(transformed_selectors);
                 }
+
                 Err(_) => {
                     error!("Failed to transform one off global selector");
                     // TODO:
@@ -347,6 +360,7 @@ impl<'i> Visitor<'i> for CssNamespace {
 
             if combinator.is_none() {
                 combinator = iter.next_sequence();
+
                 if combinator.is_none() {
                     break;
                 }
@@ -360,6 +374,7 @@ impl<'i> Visitor<'i> for CssNamespace {
             prev: None,
         }
         .collect();
+
         debug!("Selector vector: {:?}", SafeDebug(&new));
 
         *selector = Selector::from(new);
@@ -389,6 +404,7 @@ where
                     _ => Some(Component::Combinator(Combinator::Descendant)),
                 }
             }
+
             Some(v) => Some(v),
             _ => {
                 self.prev = self.iter.next();
@@ -427,6 +443,7 @@ impl CssNamespace {
         #[cfg(debug_assertions)]
         {
             let prev_sel = Selector::from(node.clone());
+
             debug!("Input selector: {:?}", SafeDebug(&prev_sel))
         }
 
@@ -451,6 +468,7 @@ impl CssNamespace {
 
                     parse_token_list(arguments)
                 }
+
                 Component::PseudoElement(_)
                 | Component::NonTSPseudoClass(..)
                 | Component::Negation(..)
@@ -472,6 +490,7 @@ impl CssNamespace {
 
                     continue;
                 }
+
                 _ => {
                     continue;
                 }
@@ -504,6 +523,7 @@ impl CssNamespace {
             complex_selectors.reverse();
 
             result.extend(complex_selectors);
+
             result.extend(node.into_iter().skip(i + 1));
 
             if let Some(combinator) = combinator {
@@ -528,6 +548,7 @@ impl CssNamespace {
             true => Cow::Borrowed("__jsx-style-dynamic-selector"),
             false => Cow::Owned(self.class_name.clone()),
         };
+
         match pseudo_index {
             None => {
                 if !self.is_global {
@@ -569,39 +590,51 @@ fn parse_token_list<'i>(tokens: &TokenList<'i>) -> Selector<'i> {
             TokenOrValue::Token(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Color(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Url(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Var(..) => {
                 unimplemented!("parse_token_list: var")
             }
+
             TokenOrValue::Env(..) => {
                 unimplemented!("parse_token_list: env var")
             }
+
             TokenOrValue::Function(..) => {
                 unimplemented!("parse_token_list: function")
             }
+
             TokenOrValue::Length(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Angle(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Time(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::Resolution(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::DashedIdent(t) => {
                 buf.push_str(&t.to_css_string(Default::default()).unwrap());
             }
+
             TokenOrValue::UnresolvedColor(..) => {
                 unimplemented!("parse_token_list: unresolved color")
             }
+
             TokenOrValue::AnimationName(_) => {
                 unimplemented!("parse_token_list: animation name")
             }
@@ -628,6 +661,7 @@ impl Debug for SafeDebug<'_> {
             Ok(s) => {
                 write!(f, "{}", s)
             }
+
             Err(_) => write!(f, "<panicked>"),
         }
     }

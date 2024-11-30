@@ -36,7 +36,9 @@ impl Jest {
 		let items = orig.take();
 
 		let mut new = Vec::with_capacity(items.len());
+
 		let mut hoisted = Vec::with_capacity(8);
+
 		items.into_iter().for_each(|item| {
 			match item.try_into_stmt() {
 				Ok(stmt) => {

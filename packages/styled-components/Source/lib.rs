@@ -30,6 +30,7 @@ fn styled_components(mut program:Program, data:TransformPluginProgramMetadata) -
 		});
 
 	let pos = data.source_map.lookup_char_pos(program.span().lo);
+
 	let hash = pos.file.src_hash;
 
 	let mut pass =

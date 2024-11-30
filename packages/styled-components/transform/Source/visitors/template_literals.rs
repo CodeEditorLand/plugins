@@ -26,6 +26,7 @@ impl VisitMut for TemplateLiterals {
         let Expr::TaggedTpl(tagged) = expr else {
             return;
         };
+
         if !self.state.borrow().is_styled(&tagged.tag)
             && !self.state.borrow().is_helper(&tagged.tag)
         {
@@ -48,7 +49,9 @@ impl VisitMut for TemplateLiterals {
                 })
                 .map(ExprOrSpread::from)
                 .map(Some);
+
             let exprs = tagged.tpl.exprs.into_iter().map(ExprOrSpread::from);
+
             let args = iter::once(
                 Expr::Array(ArrayLit {
                     span: DUMMY_SP,

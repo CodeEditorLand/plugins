@@ -36,11 +36,13 @@ impl Algorithm {
 
                 Ok(encode_hex(mc.encrypt_str_to_bytes(value)))
             }
+
             Algorithm::AES192 => {
                 let mc = new_magic_crypt!(key, 192);
 
                 Ok(encode_hex(mc.encrypt_str_to_bytes(value)))
             }
+
             Algorithm::AES256 => {
                 let mc = new_magic_crypt!(key, 256);
 
@@ -81,6 +83,7 @@ where
                 .expect("failed to encrypt");
 
             n.raw = None;
+
             n.value = format!("{}{}", self.config.prefix, encrypted).into();
         }
     }

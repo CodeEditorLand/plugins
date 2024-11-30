@@ -18,6 +18,7 @@ fn inject_unique_placeholders(str_arr: impl IntoIterator<Item = impl AsRef<str>>
         if i > 0 {
             result.push_str(&make_placeholder(i - 1));
         }
+
         result.push_str(s.as_ref());
     }
 
@@ -46,12 +47,16 @@ fn reduce_substr(
     for (i, substr) in substrs.into_iter().enumerate() {
         if i == 0 {
             res.push_str(substr.as_ref());
+
             continue;
         }
+
         if predicate(&res) {
             break;
         }
+
         res.push_str(join.as_ref());
+
         res.push_str(substr.as_ref());
     }
 
@@ -127,6 +132,7 @@ fn minify_values(
     linebreak_regex: &Regex,
 ) -> MinifyResult {
     let code = inject_unique_placeholders(values);
+
     let minified_code = minify(code, linebreak_regex);
 
     let minified_values = split_by_placeholders(&minified_code)
@@ -164,8 +170,11 @@ mod tests {
     #[test]
     fn test_count_occurrences() {
         assert_eq!(count_occurrences("abbbcc", 'a'), 1);
+
         assert_eq!(count_occurrences("abbbcc", 'b'), 3);
+
         assert_eq!(count_occurrences("abbbcc", 'c'), 2);
+
         assert_eq!(count_occurrences("abbbcc", 'd'), 0);
     }
 

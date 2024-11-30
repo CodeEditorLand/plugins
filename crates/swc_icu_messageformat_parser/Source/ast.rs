@@ -103,30 +103,38 @@ impl fmt::Display for ErrorKind {
             ErrorKind::UnclosedQuoteInArgumentStyle => {
                 write!(f, "UNCLOSED_QUOTE_IN_ARGUMENT_STYLE")
             }
+
             ErrorKind::ExpectSelectArgumentOptions => write!(f, "EXPECT_SELECT_ARGUMENT_OPTIONS"),
             ErrorKind::ExpectPluralArgumentOffsetValue => {
                 write!(f, "EXPECT_PLURAL_ARGUMENT_OFFSET_VALUE")
             }
+
             ErrorKind::InvalidPluralArgumentOffsetValue => {
                 write!(f, "INVALID_PLURAL_ARGUMENT_OFFSET_VALUE")
             }
+
             ErrorKind::ExpectSelectArgumentSelector => write!(f, "EXPECT_SELECT_ARGUMENT_SELECTOR"),
             ErrorKind::ExpectPluralArgumentSelector => write!(f, "EXPECT_PLURAL_ARGUMENT_SELECTOR"),
             ErrorKind::ExpectSelectArgumentSelectorFragment => {
                 write!(f, "EXPECT_SELECT_ARGUMENT_SELECTOR_FRAGMENT")
             }
+
             ErrorKind::ExpectPluralArgumentSelectorFragment => {
                 write!(f, "EXPECT_PLURAL_ARGUMENT_SELECTOR_FRAGMENT")
             }
+
             ErrorKind::InvalidPluralArgumentSelector => {
                 write!(f, "INVALID_PLURAL_ARGUMENT_SELECTOR")
             }
+
             ErrorKind::DuplicatePluralArgumentSelector => {
                 write!(f, "DUPLICATE_PLURAL_ARGUMENT_SELECTOR")
             }
+
             ErrorKind::DuplicateSelectArgumentSelector => {
                 write!(f, "DUPLICATE_SELECT_ARGUMENT_SELECTOR")
             }
+
             ErrorKind::MissingOtherClause => write!(f, "MISSING_OTHER_CLAUSE"),
             ErrorKind::InvalidTag => write!(f, "INVALID_TAG"),
             ErrorKind::InvalidTagName => write!(f, "INVALID_TAG_NAME"),
@@ -281,81 +289,115 @@ impl Serialize for AstElement<'_> {
                 ref span,
             } => {
                 let mut state = serializer.serialize_struct("Literal", 3)?;
+
                 state.serialize_field("type", &0)?;
+
                 state.serialize_field("value", value)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.end()
             }
+
             AstElement::Argument {
                 ref value,
                 ref span,
             } => {
                 let mut state = serializer.serialize_struct("Argument", 3)?;
+
                 state.serialize_field("type", &1)?;
+
                 state.serialize_field("value", value)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.end()
             }
+
             AstElement::Number {
                 ref value,
                 ref span,
                 ref style,
             } => {
                 let mut state = serializer.serialize_struct("Number", 4)?;
+
                 state.serialize_field("type", &2)?;
+
                 state.serialize_field("value", value)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.serialize_field("style", style)?;
+
                 state.end()
             }
+
             AstElement::Date {
                 ref value,
                 ref span,
                 ref style,
             } => {
                 let mut state = serializer.serialize_struct("Date", 4)?;
+
                 state.serialize_field("type", &3)?;
+
                 state.serialize_field("value", value)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.serialize_field("style", style)?;
+
                 state.end()
             }
+
             AstElement::Time {
                 ref value,
                 ref span,
                 ref style,
             } => {
                 let mut state = serializer.serialize_struct("Time", 4)?;
+
                 state.serialize_field("type", &4)?;
+
                 state.serialize_field("value", value)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.serialize_field("style", style)?;
+
                 state.end()
             }
+
             AstElement::Select {
                 ref value,
                 ref span,
                 ref options,
             } => {
                 let mut state = serializer.serialize_struct("Select", 4)?;
+
                 state.serialize_field("type", &5)?;
+
                 state.serialize_field("value", value)?;
+
                 state.serialize_field("options", options)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.end()
             }
+
             AstElement::Plural {
                 ref value,
                 ref span,
@@ -364,34 +406,51 @@ impl Serialize for AstElement<'_> {
                 ref options,
             } => {
                 let mut state = serializer.serialize_struct("Plural", 6)?;
+
                 state.serialize_field("type", &6)?;
+
                 state.serialize_field("value", value)?;
+
                 state.serialize_field("options", options)?;
+
                 state.serialize_field("offset", offset)?;
+
                 state.serialize_field("pluralType", plural_type)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.end()
             }
+
             AstElement::Pound(ref span) => {
                 let mut state = serializer.serialize_struct("Pound", 2)?;
+
                 state.serialize_field("type", &7)?;
+
                 state.serialize_field("location", span)?;
+
                 state.end()
             }
+
             AstElement::Tag {
                 ref value,
                 ref span,
                 ref children,
             } => {
                 let mut state = serializer.serialize_struct("Pound", 2)?;
+
                 state.serialize_field("type", &8)?;
+
                 state.serialize_field("value", value)?;
+
                 state.serialize_field("children", children)?;
+
                 if span.is_some() {
                     state.serialize_field("location", span)?;
                 }
+
                 state.end()
             }
         }
@@ -413,7 +472,9 @@ impl Serialize for PluralOrSelectOptions<'_> {
         S: Serializer,
     {
         let options = &self.0;
+
         let mut state = serializer.serialize_map(Some(options.len()))?;
+
         for (selector, fragment) in options {
             #[cfg(feature = "utf16")]
             let s = selector.to_string();
@@ -421,8 +482,10 @@ impl Serialize for PluralOrSelectOptions<'_> {
             let s = s.as_str();
             #[cfg(not(feature = "utf16"))]
             let s = selector;
+
             state.serialize_entry(s, fragment)?;
         }
+
         state.end()
     }
 }
@@ -490,6 +553,7 @@ mod tests {
     use serde_json::json;
 
     use super::*;
+
     use crate::intl::number_format_options::JsIntlNumberFormatOptions;
 
     #[test]

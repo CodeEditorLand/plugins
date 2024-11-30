@@ -10,13 +10,17 @@ use swc_formatjs_transform::{create_formatjs_visitor, FormatJSPluginOptions};
 #[plugin_transform]
 pub fn process(mut program: Program, metadata: TransformPluginProgramMetadata) -> Program {
     let filename = metadata.get_context(&TransformPluginMetadataContextKind::Filename);
+
     let filename = filename.as_deref().unwrap_or("unknown.js");
 
     let plugin_config = metadata.get_transform_plugin_config();
+
     let plugin_options: FormatJSPluginOptions = if let Some(plugin_config) = plugin_config {
         serde_json::from_str(&plugin_config).unwrap_or_else(|f| {
             println!("Could not deserialize instrumentation option");
+
             println!("{:#?}", f);
+
             Default::default()
         })
     } else {

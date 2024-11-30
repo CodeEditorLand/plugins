@@ -59,6 +59,7 @@ impl DisplayNameAndId {
             {
                 file_stem.into()
             }
+
             _ => self.get_block_name(
                 p.parent()
                     .expect("path only contains meaningless filenames (e.g. /index/index)?"),
@@ -90,7 +91,9 @@ impl DisplayNameAndId {
 
     fn next_id(&mut self) -> usize {
         let ret = self.component_id;
+
         self.component_id += 1;
+
         ret
     }
 
@@ -102,10 +105,15 @@ impl DisplayNameAndId {
 
         let hash = {
             let base = self.src_file_hash;
+
             let base = base.to_be_bytes();
+
             let a = u32::from_be_bytes(base[0..4].try_into().unwrap());
+
             let b = u32::from_be_bytes(base[4..8].try_into().unwrap());
+
             let c = u32::from_be_bytes(base[8..12].try_into().unwrap());
+
             let d = u32::from_be_bytes(base[12..16].try_into().unwrap());
 
             a ^ b ^ c ^ d
@@ -179,6 +187,7 @@ impl DisplayNameAndId {
                             if let Expr::Object(obj) = &mut *first_arg.expr {
                                 if !already_has(&*obj) {
                                     obj.props.extend(with_config_props);
+
                                     return;
                                 }
                             }
@@ -202,6 +211,7 @@ impl DisplayNameAndId {
                 .as_arg()],
                 ..Default::default()
             }));
+
             return;
         }
 
@@ -223,6 +233,7 @@ impl DisplayNameAndId {
                 .as_arg()],
                 ..Default::default()
             }));
+
             return;
         }
 
@@ -309,6 +320,7 @@ impl VisitMut for DisplayNameAndId {
         if !is_styled {
             return;
         }
+
         debug!("Found styled component");
 
         let _tracing = if cfg!(debug_assertions) {
@@ -321,9 +333,11 @@ impl VisitMut for DisplayNameAndId {
             .config
             .display_name
             .then(|| self.get_display_name(expr));
+
         trace!("display_name: {:?}", display_name);
 
         let component_id = self.config.ssr.then(|| self.get_component_id().into());
+
         trace!("component_id: {:?}", display_name);
 
         self.add_config(

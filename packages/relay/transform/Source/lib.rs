@@ -142,14 +142,17 @@ pub struct ProjectConfig {
 fn strip_comments(s: &str) -> Cow<str> {
     if s.contains('#') {
         let mut buf = String::with_capacity(s.len());
+
         for line in s.lines() {
             if let Some(idx) = line.find('#') {
                 buf.push_str(&line[..idx]);
             } else {
                 buf.push_str(line);
             }
+
             buf.push('\n');
         }
+
         buf.into()
     } else {
         s.into()
@@ -200,6 +203,7 @@ impl Fold for Relay {
                     expr
                 }
             }
+
             _ => expr,
         }
     }
@@ -289,6 +293,7 @@ impl Relay {
             FileName::Real(real_file_name) => {
                 self.path_for_artifact(real_file_name, operation_name)
             }
+
             _ => Err(BuildRequirePathError::FileNameNotReal),
         }
     }
@@ -320,6 +325,7 @@ impl Relay {
                             item: ident_name.clone(),
                             unresolved_mark: self.unresolved_mark,
                         });
+
                         let operation_ident = Ident {
                             ctxt: self
                                 .unresolved_mark
@@ -328,6 +334,7 @@ impl Relay {
                             sym: ident_name,
                             ..Default::default()
                         };
+
                         Some(Expr::Ident(operation_ident))
                     } else {
                         Some(build_require_expr_from_path(
@@ -336,6 +343,7 @@ impl Relay {
                         ))
                     }
                 }
+
                 Err(_err) => {
                     // let base_error = "Could not transform GraphQL template to a Relay import.";
                     // let error_message = match err {

@@ -29,6 +29,7 @@ impl Visit for TopLevelBindingCollector {
         if !self.in_pat_decl {
             return;
         }
+
         match node {
             Pat::Ident(i) => self.add(&i.id.to_id()),
             Pat::Object(o) => {
@@ -40,14 +41,17 @@ impl Visit for TopLevelBindingCollector {
                     }
                 }
             }
+
             Pat::Array(a) => {
                 for elem in a.elems.iter() {
                     elem.visit_with(self);
                 }
             }
+
             Pat::Assign(a) => {
                 a.left.visit_with(self);
             }
+
             _ => {}
         }
     }
@@ -70,8 +74,11 @@ impl Visit for TopLevelBindingCollector {
 
     fn visit_var_declarator(&mut self, node: &VarDeclarator) {
         let old = self.in_pat_decl;
+
         self.in_pat_decl = true;
+
         node.name.visit_with(self);
+
         self.in_pat_decl = old;
     }
 }
@@ -84,6 +91,8 @@ where
         bindings: Default::default(),
         in_pat_decl: false,
     };
+
     n.visit_with(&mut v);
+
     v.bindings
 }

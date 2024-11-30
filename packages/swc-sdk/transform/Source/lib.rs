@@ -61,6 +61,7 @@ where
         if let ModuleItem::ModuleDecl(ModuleDecl::Import(import)) = m {
             if self.config.remove_imports_from.contains(&import.src.value) {
                 m.take();
+
                 return;
             }
         }

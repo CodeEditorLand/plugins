@@ -73,7 +73,9 @@ enum CtxData<'a> {
 impl Rewriter<'_> {
     fn new_path(&self, name_str: Option<&str>) -> Atom {
         let mut ctx: HashMap<&str, CtxData> = HashMap::new();
+
         ctx.insert("matches", CtxData::Array(&self.group[..]));
+
         if let Some(name_str) = name_str {
             ctx.insert("member", CtxData::Plain(name_str));
         }
@@ -88,6 +90,7 @@ impl Rewriter<'_> {
                 // We iterate over the items to find the first match
                 v.iter().any(|(k, val)| {
                     let mut key = k.to_string();
+
                     if !key.starts_with('^') && !key.ends_with('$') {
                         key = format!("^{}$", key);
                     }
@@ -95,12 +98,15 @@ impl Rewriter<'_> {
                     // Create a clone of the context, as we need to insert the
                     // `memberMatches` key for each key we try.
                     let mut ctx_with_member_matches: HashMap<&str, CtxData> = HashMap::new();
+
                     ctx_with_member_matches.insert("matches", CtxData::Array(&self.group[..]));
 
                     if let Some(name_str) = name_str {
                         ctx_with_member_matches.insert("member", CtxData::Plain(name_str));
                     }
+
                     let regex = CachedRegex::new(&key).expect("transform-imports: invalid regex");
+
                     if let Some(name_str) = name_str {
                         let group = regex.captures(name_str);
 
@@ -110,6 +116,7 @@ impl Rewriter<'_> {
                                 .map(|x| x.map(|x| x.as_str()).unwrap_or_default())
                                 .collect::<Vec<&str>>()
                                 .clone();
+
                             ctx_with_member_matches
                                 .insert("memberMatches", CtxData::Array(&group[..]));
 
@@ -160,12 +167,14 @@ impl Rewriter<'_> {
             match spec {
                 ExportSpecifier::Named(named_spec) => {
                     let name_str = named_spec.exported.as_ref().unwrap_or(&named_spec.orig);
+
                     let name_str = match name_str {
                         ModuleExportName::Ident(x) => x.as_ref(),
                         ModuleExportName::Str(x) => x.value.as_ref(),
                     };
 
                     let new_path = self.new_path(Some(name_str));
+
                     let specifier = if self.config.skip_default_conversion {
                         ExportSpecifier::Named(named_spec.clone())
                     } else {
@@ -185,6 +194,7 @@ impl Rewriter<'_> {
                             is_type_only: false,
                         })
                     };
+
                     out.push(NamedExport {
                         specifiers: vec![specifier],
                         src: Some(Box::new(Str::from(new_path.as_ref()))),
@@ -193,13 +203,17 @@ impl Rewriter<'_> {
                         with: None,
                     });
                 }
+
                 ExportSpecifier::Namespace(ns_spec) if self.config.handle_namespace_import => {
                     let name_str = match &ns_spec.name {
                         ModuleExportName::Ident(x) => x.as_ref(),
                         ModuleExportName::Str(x) => x.value.as_ref(),
                     };
+
                     let new_path = self.new_path(Some(name_str));
+
                     let specifier = ExportSpecifier::Namespace(ns_spec.clone());
+
                     out.push(NamedExport {
                         specifiers: vec![specifier],
                         src: Some(Box::new(Str::from(new_path.as_ref()))),
@@ -208,6 +222,7 @@ impl Rewriter<'_> {
                         with: None,
                     });
                 }
+
                 _ => {
                     if self.config.prevent_full_import {
                         panic!(
@@ -221,6 +236,7 @@ impl Rewriter<'_> {
                 }
             }
         }
+
         out
     }
 
@@ -244,6 +260,7 @@ impl Rewriter<'_> {
                         .unwrap_or_else(|| named_spec.local.as_ref());
 
                     let new_path = self.new_path(Some(name_str));
+
                     let specifier = if self.config.skip_default_conversion {
                         ImportSpecifier::Named(named_spec.clone())
                     } else {
@@ -252,6 +269,7 @@ impl Rewriter<'_> {
                             span: named_spec.span,
                         })
                     };
+
                     out.push(ImportDecl {
                         specifiers: vec![specifier],
                         src: Box::new(Str::from(new_path.as_ref())),
@@ -261,10 +279,14 @@ impl Rewriter<'_> {
                         phase: Default::default(),
                     });
                 }
+
                 ImportSpecifier::Namespace(ns_spec) if self.config.handle_namespace_import => {
                     let name_str = ns_spec.local.as_ref();
+
                     let new_path = self.new_path(Some(name_str));
+
                     let specifier = ImportSpecifier::Namespace(ns_spec.clone());
+
                     out.push(ImportDecl {
                         specifiers: vec![specifier],
                         src: Box::new(Str::from(new_path.as_ref())),
@@ -274,10 +296,14 @@ impl Rewriter<'_> {
                         phase: Default::default(),
                     });
                 }
+
                 ImportSpecifier::Default(def_spec) if self.config.handle_default_import => {
                     let name_str = def_spec.local.as_ref();
+
                     let new_path = self.new_path(Some(name_str));
+
                     let specifier = ImportSpecifier::Default(def_spec.clone());
+
                     out.push(ImportDecl {
                         specifiers: vec![specifier],
                         src: Box::new(Str::from(new_path.as_ref())),
@@ -287,6 +313,7 @@ impl Rewriter<'_> {
                         phase: Default::default(),
                     });
                 }
+
                 _ => {
                     if self.config.prevent_full_import {
                         panic!(
@@ -300,6 +327,7 @@ impl Rewriter<'_> {
                 }
             }
         }
+
         out
     }
 }
@@ -308,11 +336,13 @@ impl FoldImports {
     fn should_rewrite<'a>(&'a self, name: &'a str) -> Option<Rewriter<'a>> {
         for (regex, config) in &self.packages {
             let group = regex.captures(name);
+
             if let Some(group) = group {
                 let group = group
                     .iter()
                     .map(|x| x.map(|x| x.as_str()).unwrap_or_default())
                     .collect::<Vec<&str>>();
+
                 return Some(Rewriter {
                     renderer: &self.renderer,
                     key: name,
@@ -321,6 +351,7 @@ impl FoldImports {
                 });
             }
         }
+
         None
     }
 }
@@ -330,18 +361,21 @@ impl Fold for FoldImports {
 
     fn fold_module(&mut self, mut module: Module) -> Module {
         let mut new_items: Vec<ModuleItem> = vec![];
+
         for item in module.body {
             match item {
                 ModuleItem::ModuleDecl(ModuleDecl::Import(decl)) => {
                     // Ignore side-effect only imports
                     if decl.specifiers.is_empty() {
                         new_items.push(ModuleItem::ModuleDecl(ModuleDecl::Import(decl)));
+
                         continue;
                     }
 
                     match self.should_rewrite(&decl.src.value) {
                         Some(rewriter) => {
                             let rewritten = rewriter.rewrite_import(&decl);
+
                             new_items.extend(
                                 rewritten
                                     .into_iter()
@@ -349,14 +383,17 @@ impl Fold for FoldImports {
                                     .map(ModuleItem::ModuleDecl),
                             );
                         }
+
                         None => new_items.push(ModuleItem::ModuleDecl(ModuleDecl::Import(decl))),
                     }
                 }
+
                 ModuleItem::ModuleDecl(ModuleDecl::ExportNamed(
                     decl @ NamedExport { src: Some(..), .. },
                 )) => match self.should_rewrite(&decl.src.as_deref().unwrap().value) {
                     Some(rewriter) => {
                         let rewritten = rewriter.rewrite_export(&decl);
+
                         new_items.extend(
                             rewritten
                                 .into_iter()
@@ -364,6 +401,7 @@ impl Fold for FoldImports {
                                 .map(ModuleItem::ModuleDecl),
                         );
                     }
+
                     None => new_items.push(ModuleItem::ModuleDecl(ModuleDecl::ExportNamed(decl))),
                 },
 
@@ -371,6 +409,7 @@ impl Fold for FoldImports {
                     match self.should_rewrite(&e.src.value) {
                         Some(rewriter) => {
                             let rewritten = rewriter.new_path(None);
+
                             new_items.push(ModuleItem::ModuleDecl(ModuleDecl::ExportAll(
                                 ExportAll {
                                     src: Box::new(Str {
@@ -382,17 +421,21 @@ impl Fold for FoldImports {
                                 },
                             )));
                         }
+
                         None => {
                             new_items.push(ModuleItem::ModuleDecl(ModuleDecl::ExportAll(e)));
                         }
                     }
                 }
+
                 _ => {
                     new_items.push(item);
                 }
             }
         }
+
         module.body = new_items;
+
         module
     }
 }
@@ -402,28 +445,35 @@ pub fn modularize_imports(config: Config) -> impl Pass {
         renderer: handlebars::Handlebars::new(),
         packages: vec![],
     };
+
     folder
         .renderer
         .register_helper("lowerCase", Box::new(helper_lower_case));
+
     folder
         .renderer
         .register_helper("upperCase", Box::new(helper_upper_case));
+
     folder
         .renderer
         .register_helper("camelCase", Box::new(helper_camel_case));
+
     folder
         .renderer
         .register_helper("kebabCase", Box::new(helper_kebab_case));
+
     for (mut k, v) in config.packages {
         // XXX: Should we keep this hack?
         if !k.starts_with('^') && !k.ends_with('$') {
             k = format!("^{}$", k);
         }
+
         folder.packages.push((
             CachedRegex::new(&k).expect("transform-imports: invalid regex"),
             v,
         ));
     }
+
     fold_pass(folder)
 }
 
@@ -436,7 +486,9 @@ fn helper_lower_case(
 ) -> HelperResult {
     // get parameter from helper or throw an error
     let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
+
     out.write(param.to_lowercase().as_ref())?;
+
     Ok(())
 }
 
@@ -449,7 +501,9 @@ fn helper_upper_case(
 ) -> HelperResult {
     // get parameter from helper or throw an error
     let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
+
     out.write(param.to_uppercase().as_ref())?;
+
     Ok(())
 }
 
@@ -464,6 +518,7 @@ fn helper_camel_case(
     let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
 
     out.write(param.to_case(Case::Camel).as_ref())?;
+
     Ok(())
 }
 
@@ -478,5 +533,6 @@ fn helper_kebab_case(
     let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
 
     out.write(param.to_case(Case::Kebab).as_ref())?;
+
     Ok(())
 }

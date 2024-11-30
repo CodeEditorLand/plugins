@@ -38,6 +38,7 @@ impl RemoveConsole {
 
     fn should_remove_call(&mut self, n: &CallExpr) -> bool {
         let callee = &n.callee;
+
         let member_expr = match callee {
             Callee::Expr(e) => match &**e {
                 Expr::Member(m) => m,
@@ -55,6 +56,7 @@ impl RemoveConsole {
         // Only proceed if the object is the global `console` object.
         match &*member_expr.obj {
             Expr::Ident(i) if self.is_global_console(i) => {}
+
             _ => return false,
         }
 
@@ -63,6 +65,7 @@ impl RemoveConsole {
         // should be small.
         match &member_expr.prop {
             MemberProp::Ident(i) if !self.exclude.iter().any(|x| *x == i.sym) => {}
+
             _ => return false,
         }
 
@@ -81,6 +84,7 @@ impl Fold for RemoveConsole {
                 }
             }
         }
+
         stmt.fold_children_with(self)
     }
 }
@@ -90,6 +94,7 @@ pub fn remove_console(config: Config, unresolved_ctxt: SyntaxContext) -> impl Pa
         Config::WithOptions(x) => x.exclude,
         _ => vec![],
     };
+
     fold_pass(RemoveConsole {
         exclude,
         unresolved_ctxt,

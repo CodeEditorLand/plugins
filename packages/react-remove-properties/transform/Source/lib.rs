@@ -38,10 +38,12 @@ pub fn react_remove_properties(config: Config) -> impl Pass {
             .collect(),
         _ => vec![],
     };
+
     if properties.is_empty() {
         // Keep the default regex identical to `babel-plugin-react-remove-properties`.
         properties.push(CachedRegex::new(r"^data-test").unwrap());
     }
+
     fold_pass(RemoveProperties { properties })
 }
 
@@ -65,6 +67,7 @@ impl Fold for RemoveProperties {
               ..
             }) if self.should_remove_property(ident.sym.as_ref()))
         });
+
         el.fold_children_with(self)
     }
 }

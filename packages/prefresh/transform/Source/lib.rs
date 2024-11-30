@@ -29,8 +29,11 @@ fn default_library() -> Vec<String> {
 }
 pub fn hash_string(s: &str) -> String {
     let mut hasher = DefaultHasher::new();
+
     hasher.write(s.as_bytes());
+
     let hash_result = hasher.finish();
+
     format!("{:x}", hash_result)
 }
 
@@ -64,6 +67,7 @@ impl PrefreshPlugin {
         let Some(root) = mem.obj.as_ident() else {
             return false;
         };
+
         if !self.lib_local.contains(&root.to_id()) {
             return false;
         }
@@ -73,9 +77,11 @@ impl PrefreshPlugin {
             let Some(ComputedPropName { expr, .. }) = mem.prop.as_computed() else {
                 return false;
             };
+
             let Expr::Lit(Lit::Str(lit)) = expr.as_ref() else {
                 return false;
             };
+
             lit.value == "createContext"
         } else {
             // xxx.createContext
@@ -89,6 +95,7 @@ impl PrefreshPlugin {
 impl VisitMut for PrefreshPlugin {
     fn visit_mut_import_decl(&mut self, import_decl: &mut ImportDecl) {
         let import_from = import_decl.src.value.to_string();
+
         let is_library = self.config.library.contains(&import_from);
 
         if !is_library {
@@ -100,12 +107,14 @@ impl VisitMut for PrefreshPlugin {
                 ImportSpecifier::Default(spec) => {
                     self.lib_local.insert(spec.local.to_id());
                 }
+
                 ImportSpecifier::Named(spec) => {
                     if let Some(imported) = &spec.imported {
                         let name = match imported {
                             ModuleExportName::Ident(ident) => &ident.sym,
                             ModuleExportName::Str(s) => &s.value,
                         };
+
                         if name == "createContext" {
                             self.local.insert(spec.local.to_id());
                         }
@@ -113,6 +122,7 @@ impl VisitMut for PrefreshPlugin {
                         self.local.insert(spec.local.to_id());
                     }
                 }
+
                 ImportSpecifier::Namespace(spec) => {
                     self.lib_local.insert(spec.local.to_id());
                 }
@@ -123,6 +133,7 @@ impl VisitMut for PrefreshPlugin {
     fn visit_mut_expr(&mut self, expr: &mut Expr) {
         let Expr::Call(call_expr) = expr else {
             expr.visit_mut_children_with(self);
+
             return;
         };
 
@@ -137,11 +148,14 @@ impl VisitMut for PrefreshPlugin {
 
         if !is_create_context {
             call_expr.visit_mut_children_with(self);
+
             return;
         }
 
         let mut cnt = *self.counter.entry(self.parent_key.clone()).or_insert(0);
+
         cnt += 1;
+
         self.counter.insert(self.parent_key.clone(), cnt);
 
         let context_id = format!(
@@ -150,6 +164,7 @@ impl VisitMut for PrefreshPlugin {
         );
 
         let parts = context_id.split("_PARAM").collect::<Vec<&str>>();
+
         let exprs = parts
             .iter()
             .skip(1)
@@ -172,6 +187,7 @@ impl VisitMut for PrefreshPlugin {
                     .to_string(),
             ),
         }];
+
         quasis.extend(
             exprs
                 .iter()
@@ -190,6 +206,7 @@ impl VisitMut for PrefreshPlugin {
             .expect("Should convert callee to expr")
             .as_ref()
             .clone();
+
         let ident_expr = Expr::Tpl(Tpl {
             span: DUMMY_SP,
             exprs,
@@ -218,8 +235,11 @@ impl VisitMut for PrefreshPlugin {
     fn visit_mut_object_pat_prop(&mut self, obj_pat_prop: &mut ObjectPatProp) {
         if let Some(key) = obj_pat_prop.as_key_value().and_then(|kv| kv.key.as_str()) {
             let old_key = self.parent_key.clone();
+
             self.parent_key = format!("__{}", key.value);
+
             obj_pat_prop.visit_mut_children_with(self);
+
             self.parent_key = old_key;
         } else {
             obj_pat_prop.visit_mut_children_with(self);
@@ -229,8 +249,11 @@ impl VisitMut for PrefreshPlugin {
     fn visit_mut_var_declarator(&mut self, var_declarator_expr: &mut VarDeclarator) {
         if let Some(id) = var_declarator_expr.name.as_ident() {
             let old_key = self.parent_key.clone();
+
             self.parent_key = format!("${}", id.sym);
+
             var_declarator_expr.visit_mut_children_with(self);
+
             self.parent_key = old_key;
         } else {
             var_declarator_expr.visit_mut_children_with(self);
@@ -240,8 +263,11 @@ impl VisitMut for PrefreshPlugin {
     fn visit_mut_assign_expr(&mut self, assign_expr: &mut AssignExpr) {
         if let Some(id) = assign_expr.left.as_ident() {
             let old_key = self.parent_key.clone();
+
             self.parent_key = format!("_{}", id.sym);
+
             assign_expr.visit_mut_children_with(self);
+
             self.parent_key = old_key;
         } else {
             assign_expr.visit_mut_children_with(self);
@@ -259,8 +285,11 @@ impl VisitMut for PrefreshPlugin {
             func.visit_mut_children_with(self);
         } else {
             let old_key = self.param_key.clone();
+
             self.param_key = format!("__PARAM{}", params.join("_PARAM"));
+
             func.visit_mut_children_with(self);
+
             self.param_key = old_key;
         }
     }

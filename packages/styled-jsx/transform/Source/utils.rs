@@ -19,10 +19,15 @@ pub fn compute_class_names(
     style_import_name: &str,
 ) -> (Option<String>, Option<Expr>) {
     let mut static_class_name = None;
+
     let mut external_jsx_id = None;
+
     let mut static_hashes = vec![];
+
     let mut dynamic_styles = vec![];
+
     let mut external_styles = vec![];
+
     for style_info in styles {
         match style_info {
             JSXStyle::Local(style_info) => {
@@ -32,6 +37,7 @@ pub fn compute_class_names(
                     dynamic_styles.push(style_info);
                 }
             }
+
             JSXStyle::External(external) => {
                 if !external.is_global {
                     external_styles.push(external.expr.clone());
@@ -42,10 +48,13 @@ pub fn compute_class_names(
 
     if !external_styles.is_empty() {
         let mut quasis = vec![tpl_element("jsx-")];
+
         for _i in 1..external_styles.len() {
             quasis.push(tpl_element(" jsx-"))
         }
+
         quasis.push(tpl_element(""));
+
         external_jsx_id = Some(Expr::Tpl(Tpl {
             quasis,
             exprs: external_styles
@@ -83,6 +92,7 @@ pub fn compute_class_names(
                                 Some(class_name) => format!("{}{}", style_info.hash, class_name),
                                 None => style_info.hash.clone(),
                             };
+
                             Some(ExprOrSpread {
                                 expr: Box::new(Expr::Array(ArrayLit {
                                     elems: vec![
@@ -168,6 +178,7 @@ pub fn make_external_styled_jsx_el(style: &ExternalStyle, style_import_name: &st
         })),
         span: DUMMY_SP,
     })];
+
     let opening = JSXOpeningElement {
         name: JSXElementName::Ident(Ident {
             sym: style_import_name.into(),
@@ -191,6 +202,7 @@ pub fn make_external_styled_jsx_el(style: &ExternalStyle, style_import_name: &st
         expr: JSXExpr::Expr(Box::new(Expr::Ident(style.identifier.clone()))),
         span: DUMMY_SP,
     })];
+
     JSXElement {
         opening,
         closing,
@@ -209,6 +221,7 @@ pub fn make_local_styled_jsx_el(
         (true, Some(class_name)) => format!("{}{}", style_info.hash, class_name),
         _ => style_info.hash.clone(),
     };
+
     let mut attrs = vec![JSXAttrOrSpread::JSXAttr(JSXAttr {
         name: JSXAttrName::Ident(IdentName {
             sym: "id".into(),
@@ -272,6 +285,7 @@ pub fn make_local_styled_jsx_el(
         expr: JSXExpr::Expr(Box::new(css_expr)),
         span: DUMMY_SP,
     })];
+
     JSXElement {
         opening,
         closing,
@@ -309,8 +323,11 @@ pub fn styled_jsx_import_decl(style_import_name: &str) -> ModuleItem {
 // TODO: maybe use DJBHasher (need to implement)
 pub fn hash_string(s: &str) -> String {
     let mut hasher = DefaultHasher::new();
+
     hasher.write(s.as_bytes());
+
     let hash_result = hasher.finish();
+
     format!("{:x}", hash_result)
 }
 

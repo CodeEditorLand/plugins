@@ -89,13 +89,16 @@ impl VisitMut for TranspileCssProp {
                     };
 
                     let name = get_name_ident(&elem.opening.name);
+
                     let id_sym = name.sym.to_class_case();
 
                     // Match the original plugin's behavior.
                     let id_sym = id_sym.trim_end_matches(char::is_numeric);
 
                     let id_sym = JsWord::from(id_sym);
+
                     let styled_idx = self.next_styled_idx(id_sym.clone());
+
                     let id = quote_ident!(
                         SyntaxContext::empty(),
                         elem.opening.name.span(),
@@ -163,6 +166,7 @@ impl VisitMut for TranspileCssProp {
                                     {
                                         Expr::Tpl(*v.tpl.take())
                                     }
+
                                     Expr::Object(..) => *v.take(),
                                     _ => Expr::Tpl(Tpl {
                                         span: DUMMY_SP,
@@ -187,6 +191,7 @@ impl VisitMut for TranspileCssProp {
                                 _ => continue,
                             }
                         }
+
                         None => continue,
                     };
 
@@ -252,12 +257,15 @@ impl VisitMut for TranspileCssProp {
                                         })
                                     {
                                         acc.push(expr);
+
                                         return acc;
                                     }
 
                                     let identifier =
                                         get_local_identifier(&mut self.identifier_idx, &expr);
+
                                     let p = quote_ident!("p");
+
                                     extra_attrs.push(JSXAttrOrSpread::JSXAttr(JSXAttr {
                                         span: DUMMY_SP,
                                         name: JSXAttrName::Ident(identifier.clone()),
@@ -304,25 +312,30 @@ impl VisitMut for TranspileCssProp {
                         }),
                         definite: false,
                     };
+
                     let stmt = Stmt::Decl(Decl::Var(Box::new(VarDecl {
                         kind: VarDeclKind::Var,
                         declare: false,
                         decls: vec![var],
                         ..Default::default()
                     })));
+
                     match inject_after {
                         Some(injector) => {
                             let id = injector.to_id();
+
                             self.interleaved_injections
                                 .entry(id)
                                 .or_default()
                                 .push(stmt);
                         }
+
                         None => {
                             self.injected_nodes.push(stmt);
                         }
                     }
                 }
+
                 JSXAttrOrSpread::SpreadElement(_) => {}
             }
         }
@@ -337,8 +350,10 @@ impl VisitMut for TranspileCssProp {
                         return false;
                     }
                 }
+
                 JSXAttrOrSpread::SpreadElement(_) => {}
             }
+
             true
         });
 
@@ -348,15 +363,19 @@ impl VisitMut for TranspileCssProp {
     fn visit_mut_module(&mut self, n: &mut Module) {
         // TODO: Skip if there are no css prop usage
         self.top_level_decls = Some(collect_top_level_decls(n));
+
         n.visit_mut_children_with(self);
+
         self.top_level_decls = None;
 
         if let Some(import_name) = self.import_name.take() {
             self.state.borrow_mut().set_import_name(import_name.to_id());
+
             let specifier = ImportSpecifier::Default(ImportDefaultSpecifier {
                 span: DUMMY_SP,
                 local: import_name,
             });
+
             prepend_stmt(
                 &mut n.body,
                 ModuleItem::ModuleDecl(ModuleDecl::Import(ImportDecl {
@@ -375,14 +394,19 @@ impl VisitMut for TranspileCssProp {
         }
 
         let mut serialized_body: Vec<ModuleItem> = vec![];
+
         let body = std::mem::take(&mut n.body);
+
         for item in body {
             serialized_body.push(item.clone());
+
             if let ModuleItem::Stmt(Stmt::Decl(Decl::Var(vd))) = &item {
                 for decl in &vd.decls {
                     if let Pat::Ident(ident) = &decl.name {
                         let id = ident.to_id();
+
                         let stmts = self.interleaved_injections.remove(&id);
+
                         if let Some(stmts) = stmts {
                             serialized_body.extend(stmts.into_iter().rev().map(ModuleItem::Stmt));
                         }
@@ -390,11 +414,13 @@ impl VisitMut for TranspileCssProp {
                 }
             }
         }
+
         n.body = serialized_body;
 
         let mut remaining = std::mem::take(&mut self.interleaved_injections)
             .into_iter()
             .collect::<Vec<_>>();
+
         remaining.sort_by_key(|x| x.0.clone());
 
         remaining
@@ -417,6 +443,7 @@ fn get_name_expr(name: &JSXElementName) -> Box<Expr> {
             })),
         }
     }
+
     match name {
         JSXElementName::Ident(n) => Box::new(Expr::Ident(n.clone())),
         JSXElementName::JSXMemberExpr(n) => Box::new(Expr::Member(MemberExpr {
@@ -473,8 +500,10 @@ impl PropertyReducer<'_> {
 
                 acc.push(property);
             }
+
             PropOrSpread::Prop(ref mut prop) => {
                 let key = get_prop_key_as_expr(prop);
+
                 let key_pn = get_prop_name(prop);
 
                 if key.is_member()
@@ -511,6 +540,7 @@ impl PropertyReducer<'_> {
                         .fold(vec![], |acc, p| self.reduce_object_properties(acc, p));
 
                     set_value_of_prop(prop, value);
+
                     acc.push(property);
                 } else if !matches!(&*value, Expr::Lit(..)) {
                     // if a non-primitive value we have to interpolate it
@@ -536,6 +566,7 @@ impl PropertyReducer<'_> {
                     }))));
                 } else {
                     set_value_of_prop(prop, value);
+
                     acc.push(property);
                 }
             }
@@ -553,9 +584,11 @@ fn set_value_of_prop(prop: &mut Prop, value: Box<Expr>) {
                 value,
             });
         }
+
         Prop::KeyValue(p) => {
             p.value = value;
         }
+
         Prop::Assign(..) => unreachable!("assign property is not allowed for object literals"),
         Prop::Getter(_p) => todo!(),
         Prop::Setter(_p) => todo!(),

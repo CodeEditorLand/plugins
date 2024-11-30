@@ -29,6 +29,7 @@ fn get_swc_crates() -> Result<Vec<String>> {
 
 fn update_swc_crates() -> Result<()> {
 	let mut c = Command::new("cargo");
+
 	c.arg("upgrade").arg("--incompatible").arg("--recursive").arg("false");
 
 	for pkg in get_swc_crates()? {

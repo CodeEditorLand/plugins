@@ -68,6 +68,7 @@ impl Config {
         if self.namespace.is_empty() {
             return String::new();
         }
+
         format!("{}__", self.namespace)
     }
 }
@@ -82,6 +83,7 @@ where
     C: Comments,
 {
     let state: Rc<RefCell<State>> = Default::default();
+
     let config = Rc::new(config);
 
     (

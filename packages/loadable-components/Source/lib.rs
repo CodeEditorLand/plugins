@@ -114,10 +114,13 @@ where
         }) {
             // Remove this comment
             let comments = self.comments.take_leading(lo);
+
             if let Some(mut comments) = comments {
                 comments.retain(|c| !c.text.contains("#__LOADABLE__"));
+
                 self.comments.add_leading_comments(lo, comments)
             }
+
             return true;
         }
 
@@ -127,7 +130,9 @@ where
     fn transform_import_expr(&mut self, call: &mut CallExpr) {
         let import = {
             let mut v = ImportFinder::default();
+
             call.visit_with(&mut v);
+
             match v.res {
                 Some(v) => v,
                 None => return,
@@ -136,10 +141,12 @@ where
 
         match call.args.first() {
             Some(arg) if self.is_supported(&arg.expr) => {}
+
             _ => return,
         }
 
         let object = self.create_object_from(&import, &call.args[0].expr);
+
         call.args[0] = object.as_arg();
     }
 
@@ -188,6 +195,7 @@ where
 
     fn is_aggressive_import(&self, import: &CallExpr) -> bool {
         let import_arg = get_import_arg(import);
+
         match import_arg {
             Expr::Tpl(t) => !t.exprs.is_empty(),
             _ => false,
@@ -214,6 +222,7 @@ where
                 .map(|v| v.trim())
                 .filter_map(|item| {
                     let s = item.split(':').map(|s| s.trim()).collect::<Vec<_>>();
+
                     if s.len() == 2 {
                         return Some((
                             s[0].to_string(),
@@ -243,12 +252,14 @@ where
         match node {
             Expr::Tpl(t) => {
                 let v1 = t.quasis[0].cooked.clone().unwrap_or_default();
+
                 if t.exprs.is_empty() {
                     return v1.to_string();
                 }
 
                 format!("{}[request]", v1)
             }
+
             _ => unreachable!(),
         }
     }
@@ -257,11 +268,13 @@ where
         let import_arg = get_import_arg(import);
 
         let chunk_name_content = self.get_chunk_name_content(import_arg);
+
         if chunk_name_content.is_some() {
             let comments = self.comments.take_leading(import_arg.span_lo());
 
             if let Some(mut comments) = comments {
                 comments.retain(|c| !c.text.contains("webpackChunkName"));
+
                 self.comments
                     .add_leading_comments(import_arg.span_lo(), comments)
             }
@@ -279,6 +292,7 @@ where
 
     fn replace_chunk_name(&self, import: &CallExpr) -> Expr {
         let aggressive_import = self.is_aggressive_import(import);
+
         let values = self.get_existing_chunk_name_comment(import);
 
         debug!("Values: {:#?}", values);
@@ -291,6 +305,7 @@ where
         if !aggressive_import {
             if let Some(values) = values {
                 self.add_or_replace_chunk_name_comment(import, values);
+
                 return webpack_chunk_name.unwrap().into();
             }
         }
@@ -302,10 +317,12 @@ where
 
         if chunk_name_node.is_tpl() {
             webpack_chunk_name = Some(self.chunk_name_from_template_literal(&chunk_name_node));
+
             chunk_name_node = self.sanitize_chunk_name_template_literal(Box::new(chunk_name_node));
         } else if let Expr::Lit(Lit::Str(s)) = &chunk_name_node {
             webpack_chunk_name = Some(s.value.to_string());
         }
+
         let mut values = values.unwrap_or_default();
 
         if let Some(webpack_chunk_name) = webpack_chunk_name {
@@ -313,7 +330,9 @@ where
         } else {
             values["webpackChunkName"] = serde_json::Value::Null;
         }
+
         self.add_or_replace_chunk_name_comment(import, values);
+
         chunk_name_node
     }
 
@@ -534,6 +553,7 @@ where
             Expr::Lit(Lit::Str(s)) => s.value.clone(),
             _ => return "".into(),
         };
+
         self.module_to_chunk(&value).into()
     }
 
@@ -579,6 +599,7 @@ where
         if s.is_empty() {
             return Default::default();
         }
+
         let s = WEBPACK_PATH_NAME_NORMALIZE_REPLACE_REGEX.replace_all(s, "-");
 
         if strip_left_hyphen {
@@ -598,7 +619,9 @@ where
         debug!("module_to_chunk: `{}`", s);
 
         let s = JS_PATH_REGEXP.replace_all(s, "");
+
         let s = WEBPACK_PATH_NAME_NORMALIZE_REPLACE_REGEX.replace_all(&s, "-");
+
         let s = WEBPACK_MATCH_PADDED_HYPHENS_REPLACE_REGEX.replace_all(&s, "");
 
         debug!("module_to_chunk: result: `{}`", s);
@@ -635,19 +658,23 @@ where
                                 self.specifiers.insert(default_spec.local.sym.clone());
                             }
                         }
+
                         ImportSpecifier::Named(named_specifier) => {
                             if let Some(ModuleExportName::Ident(imported)) =
                                 &named_specifier.imported
                             {
                                 if imported.sym == signature.name {
                                     self.specifiers.insert(named_specifier.local.sym.clone());
+
                                     return;
                                 }
                             }
+
                             if named_specifier.local.sym == signature.name {
                                 self.specifiers.insert(named_specifier.local.sym.clone());
                             }
                         }
+
                         _ => (),
                     }
                 }
@@ -657,8 +684,10 @@ where
 
     fn visit_mut_call_expr(&mut self, call: &mut CallExpr) {
         call.visit_mut_children_with(self);
+
         match &call.callee {
             Callee::Expr(callee) if self.is_valid_identifier(callee) => {}
+
             _ => return,
         }
 
@@ -677,7 +706,9 @@ where
 
                 let import = {
                     let mut v = ImportFinder::default();
+
                     e.visit_with(&mut v);
+
                     match v.res {
                         Some(v) => v,
                         None => return,
@@ -687,6 +718,7 @@ where
                 let object = self.create_object_from(&import, e);
                 *e = object;
             }
+
             _ => {}
         }
     }
@@ -701,7 +733,9 @@ where
 
             let import = {
                 let mut v = ImportFinder::default();
+
                 m.visit_with(&mut v);
+
                 match v.res {
                     Some(v) => v,
                     None => return,
@@ -738,8 +772,10 @@ impl Visit for ImportFinder {
                          supported."
                     );
                 }
+
                 self.res = Some(call.clone());
             }
+
             _ => {
                 call.visit_children_with(self);
             }
@@ -817,6 +853,7 @@ mod tests {
     #[test]
     fn should_return_default_config_signatures() {
         let config = get_config("{}");
+
         assert_eq!(config.signatures, default_signatures())
     }
 
@@ -832,6 +869,7 @@ mod tests {
             ]
         }"#,
         );
+
         assert_eq!(
             config.signatures,
             vec![Signature {

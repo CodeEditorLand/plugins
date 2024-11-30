@@ -122,13 +122,16 @@ fn get_default_hour_symbol_from_locale(locale: &str) -> char {
 
         let hour_cycle = if extension.singleton() as char == 'u' {
             let mut ret = None;
+
             let mut ext_iter = extension.iter();
+
             loop {
                 let ext = ext_iter.next();
 
                 if let Some(ext) = ext {
                     if ext == "hc" {
                         let hour_cycle = ext_iter.next().expect("Should have hour cycle");
+
                         ret = match hour_cycle.as_str() {
                             "h11" => Some(HourCycle::H11),
                             "h12" => Some(HourCycle::H12),
@@ -141,6 +144,7 @@ fn get_default_hour_symbol_from_locale(locale: &str) -> char {
                     break;
                 }
             }
+
             ret
         } else {
             None
@@ -165,7 +169,9 @@ fn get_best_pattern(skeleton: &str, locale: &str) -> String {
     let mut ret = "".to_string();
 
     let skeleton_chars: Vec<_> = skeleton.chars().collect();
+
     let skeleton_char_len = skeleton_chars.len();
+
     let mut extra_len = 0;
 
     for (pattern_pos, pattern_char) in skeleton.chars().enumerate() {
@@ -174,15 +180,19 @@ fn get_best_pattern(skeleton: &str, locale: &str) -> String {
                 && skeleton_chars[pattern_pos + 1] == pattern_char
             {
                 extra_len += 1;
+
                 continue;
             } else {
                 let mut hour_len = 1 + (extra_len & 1);
+
                 let mut day_period_len = if extra_len < 2 {
                     1
                 } else {
                     3 + (extra_len >> 1)
                 };
+
                 let day_period_char = 'a';
+
                 let hour_char = get_default_hour_symbol_from_locale(locale);
 
                 if hour_char == 'H' || hour_char == 'k' {
@@ -191,11 +201,13 @@ fn get_best_pattern(skeleton: &str, locale: &str) -> String {
 
                 while day_period_len > 0 {
                     ret = format!("{}{}", ret, day_period_char);
+
                     day_period_len -= 1;
                 }
 
                 while hour_len > 0 {
                     ret = format!("{}{}", hour_char, ret);
+
                     hour_len -= 1;
                 }
             }
@@ -214,6 +226,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
 
     for caps in DATE_TIME_REGEX.captures_iter(skeleton) {
         let match_str = caps.get(0).map(|m| m.as_str()).unwrap_or_default();
+
         let match_len = match_str.len();
 
         match &match_str.chars().next().unwrap_or_default() {
@@ -320,6 +333,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
             //Hour
             'h' => {
                 ret.hour_cycle = Some(HourCycle::H12);
+
                 if match_len == 1 {
                     ret.hour = Some(DateTimeDisplayFormat::Numeric);
                 } else if match_len == 2 {
@@ -328,6 +342,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
             }
             'H' => {
                 ret.hour_cycle = Some(HourCycle::H23);
+
                 if match_len == 1 {
                     ret.hour = Some(DateTimeDisplayFormat::Numeric);
                 } else if match_len == 2 {
@@ -336,6 +351,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
             }
             'K' => {
                 ret.hour_cycle = Some(HourCycle::H11);
+
                 if match_len == 1 {
                     ret.hour = Some(DateTimeDisplayFormat::Numeric);
                 } else if match_len == 2 {
@@ -344,6 +360,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
             }
             'k' => {
                 ret.hour_cycle = Some(HourCycle::H24);
+
                 if match_len == 1 {
                     ret.hour = Some(DateTimeDisplayFormat::Numeric);
                 } else if match_len == 2 {
@@ -385,6 +402,7 @@ fn parse_date_time_skeleton(skeleton: &str) -> JsIntlDateTimeFormatOptions {
             'x' /* 1, 2, 3, 4: The ISO8601 varios formats */ => {
                 panic!("`Z/O/v/V/X/x` (timeZone) patterns are not supported, use `z` instead'");
             }
+
             _ => {}
         }
     }
@@ -411,11 +429,14 @@ fn parse_significant_precision(ret: &mut JsIntlNumberFormatOptions, value: &str)
     }
 
     let cap = SIGNIFICANT_PRECISION_REGEX.captures(value);
+
     if let Some(cap) = cap {
         let g1 = cap.get(1);
+
         let g2 = cap.get(2);
 
         let g1_len = g1.map(|g| g.as_str().len() as u32);
+
         let is_g2_non_str = g2.is_none()
             || g2
                 .map(|g| g.as_str().parse::<u32>().is_ok())
@@ -424,6 +445,7 @@ fn parse_significant_precision(ret: &mut JsIntlNumberFormatOptions, value: &str)
         // @@@ case
         if is_g2_non_str {
             ret.minimum_significant_digits = g1_len;
+
             ret.maximum_significant_digits = g1_len;
         }
         // @@@+ case
@@ -437,6 +459,7 @@ fn parse_significant_precision(ret: &mut JsIntlNumberFormatOptions, value: &str)
         // .@@## or .@@@ case
         else {
             ret.minimum_significant_digits = g1_len;
+
             ret.maximum_significant_digits =
                 g1_len.map(|l| l + g2.map(|g| g.as_str().len() as u32).unwrap_or(0));
         }
@@ -456,6 +479,7 @@ fn parse_sign(ret: &mut JsIntlNumberFormatOptions, value: &str) {
         }
         "sign-accounting-always" | "()!" => {
             ret.sign_display = Some(NumberFormatOptionsSignDisplay::Always);
+
             ret.currency_sign = Some(NumberFormatOptionsCurrencySign::Accounting);
         }
         "sign-except-zero" | "+?" => {
@@ -463,39 +487,51 @@ fn parse_sign(ret: &mut JsIntlNumberFormatOptions, value: &str) {
         }
         "sign-accounting-except-zero" | "()?" => {
             ret.sign_display = Some(NumberFormatOptionsSignDisplay::ExceptZero);
+
             ret.currency_sign = Some(NumberFormatOptionsCurrencySign::Accounting);
         }
         "sign-never" | "+_" => {
             ret.sign_display = Some(NumberFormatOptionsSignDisplay::Never);
         }
+
         _ => {}
     }
 }
 
 fn parse_concise_scientific_and_engineering_stem(ret: &mut JsIntlNumberFormatOptions, stem: &str) {
     let mut stem = stem;
+
     let mut has_sign = false;
+
     if stem.starts_with("EE") {
         ret.notation = Some(Notation::Engineering);
+
         stem = &stem[2..];
+
         has_sign = true;
     } else if stem.starts_with("E") {
         ret.notation = Some(Notation::Scientific);
+
         stem = &stem[1..];
+
         has_sign = true;
     }
 
     if has_sign {
         let sign_display = &stem[0..2];
+
         match sign_display {
             "+!" => {
                 ret.sign_display = Some(NumberFormatOptionsSignDisplay::Always);
+
                 stem = &stem[2..];
             }
             "+?" => {
                 ret.sign_display = Some(NumberFormatOptionsSignDisplay::ExceptZero);
+
                 stem = &stem[2..];
             }
+
             _ => {}
         }
 
@@ -509,89 +545,117 @@ fn parse_concise_scientific_and_engineering_stem(ret: &mut JsIntlNumberFormatOpt
 
 fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFormatOptions {
     let mut ret = JsIntlNumberFormatOptions::default();
+
     for token in skeleton {
         match token.stem {
             "percent" | "%" => {
                 ret.style = Some(NumberFormatOptionsStyle::Percent);
+
                 continue;
             }
             "%x100" => {
                 ret.style = Some(NumberFormatOptionsStyle::Percent);
+
                 ret.scale = Some(100.0);
+
                 continue;
             }
             "currency" => {
                 ret.style = Some(NumberFormatOptionsStyle::Currency);
+
                 ret.currency = Some(token.options[0].to_string());
+
                 continue;
             }
             "group-off" | ",_" => {
                 ret.use_grouping = Some(false);
+
                 continue;
             }
             "precision-integer" | "." => {
                 ret.maximum_fraction_digits = Some(0);
+
                 continue;
             }
             "measure-unit" | "unit" => {
                 ret.style = Some(NumberFormatOptionsStyle::Unit);
+
                 ret.unit = icu_unit_to_ecma(token.options[0]);
+
                 continue;
             }
             "compact-short" | "K" => {
                 ret.notation = Some(Notation::Compact);
+
                 ret.compact_display = Some(CompactDisplay::Short);
+
                 continue;
             }
             "compact-long" | "KK" => {
                 ret.notation = Some(Notation::Compact);
+
                 ret.compact_display = Some(CompactDisplay::Long);
+
                 continue;
             }
             "scientific" => {
                 ret.notation = Some(Notation::Scientific);
+
                 for opt in &token.options {
                     parse_sign(&mut ret, opt);
                 }
+
                 continue;
             }
             "engineering" => {
                 ret.notation = Some(Notation::Engineering);
+
                 for opt in &token.options {
                     parse_sign(&mut ret, opt);
                 }
+
                 continue;
             }
             "notation-simple" => {
                 ret.notation = Some(Notation::Standard);
+
                 continue;
             }
             // https://github.com/unicode-org/icu/blob/master/icu4c/source/i18n/unicode/unumberformatter.h
             "unit-width-narrow" => {
                 ret.currency_display = Some(NumberFormatOptionsCurrencyDisplay::NarrowSymbol);
+
                 ret.unit_display = Some(UnitDisplay::Narrow);
+
                 continue;
             }
             "unit-width-short" => {
                 ret.currency_display = Some(NumberFormatOptionsCurrencyDisplay::Code);
+
                 ret.unit_display = Some(UnitDisplay::Short);
+
                 continue;
             }
             "unit-width-full-name" => {
                 ret.currency_display = Some(NumberFormatOptionsCurrencyDisplay::Name);
+
                 ret.unit_display = Some(UnitDisplay::Long);
+
                 continue;
             }
             "unit-width-iso-code" => {
                 ret.currency_display = Some(NumberFormatOptionsCurrencyDisplay::Symbol);
+
                 continue;
             }
             "scale" => {
                 ret.scale = token.options[0].parse().ok();
+
                 continue;
             }
             "integer-width" => {
                 let cap = INTEGER_WIDTH_REGEX.captures(token.options[0]);
+
                 if let Some(cap) = cap {
                     if cap.get(1).is_some() {
                         ret.minimum_integer_digits = cap.get(2).map(|c| c.as_str().len() as u32);
@@ -601,8 +665,10 @@ fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFor
                         panic!("We currently do not support exact integer digits");
                     }
                 }
+
                 continue;
             }
+
             _ => {
                 //noop
             }
@@ -611,6 +677,7 @@ fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFor
         // https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html#integer-width
         if CONCISE_INTEGER_WIDTH_REGEX.is_match(token.stem) {
             ret.minimum_integer_digits = Some(token.stem.len() as u32);
+
             continue;
         }
 
@@ -619,11 +686,16 @@ fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFor
             // https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html#fraction-precision
             // precision-integer case
             let caps = FRACTION_PRECISION_REGEX.captures(token.stem);
+
             if let Some(caps) = caps {
                 let g1_len = caps.get(1).map(|g| g.as_str().len() as u32);
+
                 let g2 = caps.get(2);
+
                 let g3 = caps.get(3);
+
                 let g4 = caps.get(4);
+
                 let g5 = caps.get(5);
 
                 // .000* case (before ICU67 it was .000+)
@@ -637,10 +709,12 @@ fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFor
                 // .00## case
                 else if g4.is_some() && g5.is_some() {
                     ret.minimum_fraction_digits = g4.map(|g| g.as_str().len() as u32);
+
                     ret.maximum_fraction_digits =
                         Some(g4.unwrap().as_str().len() as u32 + g5.unwrap().as_str().len() as u32);
                 } else {
                     ret.minimum_fraction_digits = g1_len;
+
                     ret.maximum_fraction_digits = g1_len;
                 }
 
@@ -655,18 +729,22 @@ fn parse_number_skeleton(skeleton: &Vec<NumberSkeletonToken>) -> JsIntlNumberFor
                     }
                 }
             }
+
             continue;
         }
 
         // https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html#significant-digits-precision
         if SIGNIFICANT_PRECISION_REGEX.is_match(token.stem) {
             parse_significant_precision(&mut ret, token.stem);
+
             continue;
         }
 
         parse_sign(&mut ret, token.stem);
+
         parse_concise_scientific_and_engineering_stem(&mut ret, token.stem);
     }
+
     ret
 }
 
@@ -687,6 +765,7 @@ impl<'s> Parser<'s> {
 
     pub fn parse(&mut self) -> Result<Ast> {
         assert_eq!(self.offset(), 0, "parser can only be used once");
+
         self.parse_message(0, "", false)
     }
 
@@ -714,7 +793,9 @@ impl<'s> Parser<'s> {
                 '}' if nesting_level > 0 => break,
                 '#' if matches!(parent_arg_type, "plural" | "selectordinal") => {
                     let position = self.position();
+
                     self.bump();
+
                     AstElement::Pound(Span::new(position, self.position()))
                 }
                 '<' if !self.options.ignore_tag && self.peek() == Some('/') => {
@@ -730,6 +811,7 @@ impl<'s> Parser<'s> {
                 '<' if !self.options.ignore_tag && is_alpha(self.peek()) => {
                     self.parse_tag(nesting_level, parent_arg_type)?
                 }
+
                 _ => self.parse_literal(nesting_level, parent_arg_type)?,
             })
         }
@@ -757,9 +839,11 @@ impl<'s> Parser<'s> {
     /// [custom element name]: https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
     fn parse_tag(&self, nesting_level: usize, parent_arg_type: &str) -> Result<AstElement> {
         let start_position = self.position();
+
         self.bump(); // '<'
 
         let tag_name = self.parse_tag_name();
+
         self.bump_space();
 
         if self.bump_if("/>") {
@@ -787,7 +871,9 @@ impl<'s> Parser<'s> {
                 }
 
                 let closing_tag_name_start_position = self.position();
+
                 let closing_tag_name = self.parse_tag_name();
+
                 if tag_name != closing_tag_name {
                     return Err(self.error(
                         ErrorKind::UnmatchedClosingTag,
@@ -796,8 +882,10 @@ impl<'s> Parser<'s> {
                 }
 
                 self.bump_space();
+
                 if !self.bump_if(">") {
                     let span = Span::new(end_tag_start_position, self.position());
+
                     return Err(self.error(ErrorKind::InvalidTag, span));
                 }
 
@@ -839,6 +927,7 @@ impl<'s> Parser<'s> {
         let start = self.position();
 
         let mut value = String::new();
+
         loop {
             if self.bump_if("''") {
                 value.push('\'');
@@ -854,6 +943,7 @@ impl<'s> Parser<'s> {
         }
 
         let span = Span::new(start, self.position());
+
         Ok(AstElement::Literal {
             span: if self.options.capture_location {
                 Some(span)
@@ -892,6 +982,7 @@ impl<'s> Parser<'s> {
             if self.is_eof() {
                 break;
             }
+
             match self.char() {
                 '\'' if self.peek() == Some('\'') => {
                     value.push('\'');
@@ -901,10 +992,13 @@ impl<'s> Parser<'s> {
                 '\'' => {
                     // Optional closing apostrophe.
                     self.bump();
+
                     break;
                 }
+
                 c => value.push(c),
             }
+
             self.bump();
         }
 
@@ -915,12 +1009,14 @@ impl<'s> Parser<'s> {
         if self.is_eof() {
             return None;
         }
+
         match self.char() {
             '<' | '{' => None,
             '#' if parent_arg_type == "plural" || parent_arg_type == "selectordinal" => None,
             '}' if nesting_level > 0 => None,
             c => {
                 self.bump();
+
                 Some(c)
             }
         }
@@ -946,6 +1042,7 @@ impl<'s> Parser<'s> {
         expecting_close_tag: bool,
     ) -> Result<AstElement> {
         let opening_brace_position = self.position();
+
         self.bump(); // `{`
 
         self.bump_space();
@@ -959,6 +1056,7 @@ impl<'s> Parser<'s> {
 
         if self.char() == '}' {
             self.bump();
+
             return Err(self.error(
                 ErrorKind::EmptyArgument,
                 Span::new(opening_brace_position, self.position()),
@@ -967,6 +1065,7 @@ impl<'s> Parser<'s> {
 
         // argument name
         let value = self.parse_identifier_if_possible().0.to_string();
+
         if value.is_empty() {
             return Err(self.error(
                 ErrorKind::MalformedArgument,
@@ -1046,6 +1145,7 @@ impl<'s> Parser<'s> {
 
         #[cfg(not(feature = "utf16"))]
         let arg_type = self.parse_identifier_if_possible().0;
+
         let type_end_position = self.position();
 
         match arg_type {
@@ -1068,7 +1168,9 @@ impl<'s> Parser<'s> {
                     self.bump_space();
 
                     let style_start_position = self.position();
+
                     let style = self.parse_simple_arg_style_if_possible()?.trim_end();
+
                     if style.is_empty() {
                         return Err(self.error(
                             ErrorKind::ExpectArgumentStyle,
@@ -1077,12 +1179,14 @@ impl<'s> Parser<'s> {
                     }
 
                     let style_span = Span::new(style_start_position, self.position());
+
                     Some((style, style_span))
                 } else {
                     None
                 };
 
                 self.try_parse_argument_close(opening_brace_position)?;
+
                 let span = Span::new(opening_brace_position, self.position());
 
                 // Extract style or skeleton
@@ -1111,6 +1215,7 @@ impl<'s> Parser<'s> {
                                     style: Some(NumberArgStyle::Skeleton(Box::new(skeleton))),
                                 }
                             }
+
                             _ => {
                                 if skeleton.is_empty() {
                                     return Err(self.error(ErrorKind::ExpectDateTimeSkeleton, span));
@@ -1138,6 +1243,7 @@ impl<'s> Parser<'s> {
                                     },
                                     parsed_options,
                                 }));
+
                                 if arg_type == "date" {
                                     AstElement::Date {
                                         value,
@@ -1234,12 +1340,14 @@ impl<'s> Parser<'s> {
                 let type_end_position = self.position();
 
                 self.bump_space();
+
                 if !self.bump_if(",") {
                     return Err(self.error(
                         ErrorKind::ExpectSelectArgumentOptions,
                         Span::new(type_end_position, type_end_position),
                     ));
                 }
+
                 self.bump_space();
 
                 // Parse offset:
@@ -1259,7 +1367,9 @@ impl<'s> Parser<'s> {
                             Span::new(self.position(), self.position()),
                         ));
                     }
+
                     self.bump_space();
+
                     let offset = self.try_parse_decimal_integer(
                         ErrorKind::ExpectPluralArgumentOffsetValue,
                         ErrorKind::InvalidPluralArgumentOffsetValue,
@@ -1267,6 +1377,7 @@ impl<'s> Parser<'s> {
 
                     // Parse another identifier for option parsing
                     self.bump_space();
+
                     identifier_and_span = self.parse_identifier_if_possible();
 
                     offset
@@ -1288,9 +1399,11 @@ impl<'s> Parser<'s> {
                     expecting_close_tag,
                     identifier_and_span,
                 )?;
+
                 self.try_parse_argument_close(opening_brace_position)?;
 
                 let span = Span::new(opening_brace_position, self.position());
+
                 match arg_type {
                     "select" => Ok(AstElement::Select {
                         value,
@@ -1348,7 +1461,9 @@ impl<'s> Parser<'s> {
         let mut has_other_clause = false;
 
         let mut options = vec![];
+
         let mut selectors_parsed = HashSet::new();
+
         let (mut selector, mut selector_span) = parsed_first_identifier;
         // Parse:
         // one {one apple}
@@ -1356,12 +1471,14 @@ impl<'s> Parser<'s> {
         loop {
             if selector.is_empty() {
                 let start_position = self.position();
+
                 if parent_arg_type != "select" && self.bump_if("=") {
                     // Try parse `={number}` selector
                     self.try_parse_decimal_integer(
                         ErrorKind::ExpectPluralArgumentSelector,
                         ErrorKind::InvalidPluralArgumentSelector,
                     )?;
+
                     selector_span = Span::new(start_position, self.position());
                     #[cfg(feature = "utf16")]
                     {
@@ -1397,7 +1514,9 @@ impl<'s> Parser<'s> {
             // one {one apple}
             //     ^----------^
             self.bump_space();
+
             let opening_brace_position = self.position();
+
             if !self.bump_if("{") {
                 return Err(self.error(
                     if parent_arg_type == "select" {
@@ -1414,6 +1533,7 @@ impl<'s> Parser<'s> {
                 parent_arg_type.to_string().as_str(),
                 expecting_close_tag,
             )?;
+
             self.try_parse_argument_close(opening_brace_position)?;
 
             options.push((
@@ -1434,7 +1554,9 @@ impl<'s> Parser<'s> {
             self.bump_space();
             // 🤷‍♂️ Destructure assignment is NOT yet supported by Rust.
             let _identifier_and_span = self.parse_identifier_if_possible();
+
             selector = _identifier_and_span.0;
+
             selector_span = _identifier_and_span.1;
         }
 
@@ -1464,6 +1586,7 @@ impl<'s> Parser<'s> {
         invalid_number_error: ErrorKind,
     ) -> Result<i64> {
         let mut sign = 1;
+
         let start_position = self.position();
 
         if self.bump_if("+") {
@@ -1472,8 +1595,10 @@ impl<'s> Parser<'s> {
         }
 
         let mut digits = String::new();
+
         while !self.is_eof() && self.char().is_ascii_digit() {
             digits.push(self.char());
+
             self.bump();
         }
 
@@ -1494,23 +1619,28 @@ impl<'s> Parser<'s> {
         let mut nested_braces = 0;
 
         let start_position = self.position();
+
         while !self.is_eof() {
             match self.char() {
                 '\'' => {
                     // Treat apostrophe as quoting but include it in the style part.
                     // Find the end of the quoted literal text.
                     self.bump();
+
                     let apostrophe_position = self.position();
+
                     if !self.bump_until('\'') {
                         return Err(self.error(
                             ErrorKind::UnclosedQuoteInArgumentStyle,
                             Span::new(apostrophe_position, self.position()),
                         ));
                     }
+
                     self.bump();
                 }
                 '{' => {
                     nested_braces += 1;
+
                     self.bump();
                 }
                 '}' => {
@@ -1520,6 +1650,7 @@ impl<'s> Parser<'s> {
                         break;
                     }
                 }
+
                 _ => {
                     self.bump();
                 }
@@ -1545,6 +1676,7 @@ impl<'s> Parser<'s> {
                 Span::new(opening_brace_position, self.position()),
             ));
         }
+
         self.bump(); // `}`
 
         Ok(())
@@ -1558,6 +1690,7 @@ impl<'s> Parser<'s> {
         }
 
         let end_position = self.position();
+
         Span::new(starting_position, end_position)
     }
 
@@ -1624,14 +1757,18 @@ impl<'s> Parser<'s> {
         if self.is_eof() {
             return;
         }
+
         let Position {
             mut offset,
             mut line,
             mut column,
         } = self.position();
+
         let ch = self.char();
+
         if ch == '\n' {
             line = line.checked_add(1).unwrap();
+
             column = 1;
         } else {
             column = column.checked_add(1).unwrap();
@@ -1645,6 +1782,7 @@ impl<'s> Parser<'s> {
         {
             offset += ch.len_utf8();
         }
+
         self.position.set(Position {
             offset,
             line,
@@ -1665,12 +1803,14 @@ impl<'s> Parser<'s> {
         );
 
         let target_offset = cmp::min(target_offset, self.message.len());
+
         loop {
             let offset = self.offset();
 
             if self.offset() == target_offset {
                 break;
             }
+
             assert!(
                 offset < target_offset,
                 "target_offset is at invalid unicode byte boundary: {}",
@@ -1678,6 +1818,7 @@ impl<'s> Parser<'s> {
             );
 
             self.bump();
+
             if self.is_eof() {
                 break;
             }
@@ -1701,6 +1842,7 @@ impl<'s> Parser<'s> {
             for _ in 0..prefix.chars().count() {
                 self.bump();
             }
+
             true
         } else {
             false
@@ -1711,11 +1853,14 @@ impl<'s> Parser<'s> {
     /// Otherwise bump to the end of the file and return `false`.
     fn bump_until(&self, pattern: char) -> bool {
         let current_offset = self.offset();
+
         if let Some(delta) = self.message[current_offset..].find(pattern) {
             self.bump_to(current_offset + delta);
+
             true
         } else {
             self.bump_to(self.message.len());
+
             false
         }
     }
@@ -1735,6 +1880,7 @@ impl<'s> Parser<'s> {
         if self.is_eof() {
             return None;
         }
+
         self.message[self.offset() + self.char().len_utf8()..]
             .chars()
             .next()
@@ -1765,6 +1911,7 @@ fn parse_number_skeleton_from_string(
         .filter(|x| !x.is_empty())
         .map(|token| {
             let mut stem_and_options = token.split('/');
+
             if let Some(stem) = stem_and_options.next() {
                 let options: std::result::Result<Vec<_>, _> = stem_and_options
                     .map(|option| {
@@ -1776,6 +1923,7 @@ fn parse_number_skeleton_from_string(
                         }
                     })
                     .collect();
+
                 Ok(NumberSkeletonToken {
                     stem,
                     options: options?,
@@ -1787,6 +1935,7 @@ fn parse_number_skeleton_from_string(
         .collect();
 
     let tokens = tokens?;
+
     let parsed_options = if should_parse_skeleton {
         parse_number_skeleton(&tokens)
     } else {

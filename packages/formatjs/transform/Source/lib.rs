@@ -85,6 +85,7 @@ fn create_message_descriptor_from_jsx_attr(
     attrs: &Vec<JSXAttrOrSpread>,
 ) -> JSXMessageDescriptorPath {
     let mut ret = JSXMessageDescriptorPath::default();
+
     for attr in attrs {
         if let JSXAttrOrSpread::JSXAttr(JSXAttr { name, value, .. }) = attr {
             let key = get_message_descriptor_key_from_jsx(name);
@@ -99,6 +100,7 @@ fn create_message_descriptor_from_jsx_attr(
                 "description" => {
                     ret.description = value.clone();
                 }
+
                 _ => {
                     //unexpected
                 }
@@ -113,6 +115,7 @@ fn create_message_descriptor_from_call_expr(
     props: &Vec<PropOrSpread>,
 ) -> CallExprMessageDescriptorPath {
     let mut ret = CallExprMessageDescriptorPath::default();
+
     for prop in props {
         if let PropOrSpread::Prop(prop) = prop {
             if let Prop::KeyValue(KeyValueProp { key, value }) = &**prop {
@@ -127,6 +130,7 @@ fn create_message_descriptor_from_call_expr(
                         "description" => {
                             ret.description = Some(*value.clone());
                         }
+
                         _ => {
                             //unexpected
                         }
@@ -146,6 +150,7 @@ fn get_jsx_message_descriptor_value(
     if value.is_none() {
         return None;
     }
+
     let value = value.as_ref().expect("Should be available");
 
     // NOTE: do not support evaluatePath
@@ -178,11 +183,13 @@ fn get_jsx_message_descriptor_value(
                                 .join(""),
                         )
                     }
+
                     _ => None,
                 },
                 _ => None,
             }
         }
+
         JSXAttrValue::Lit(Lit::Str(s)) => Some(s.value.to_string()),
         _ => None,
     }
@@ -217,6 +224,7 @@ fn get_call_expr_message_descriptor_value(
                     .join(""),
             )
         }
+
         _ => None,
     }
 }
@@ -238,6 +246,7 @@ impl Serialize for MessageDescriptionValue {
             // complete implementation.
             MessageDescriptionValue::Obj(obj) => {
                 let mut state = serializer.serialize_map(Some(obj.props.len()))?;
+
                 for prop in &obj.props {
                     match prop {
                         PropOrSpread::Prop(prop) => {
@@ -251,6 +260,7 @@ impl Serialize for MessageDescriptionValue {
                                             continue;
                                         }
                                     };
+
                                     let value = match &*key_value.value {
                                         Expr::Lit(Lit::Str(s)) => s.value.to_string(),
                                         _ => {
@@ -258,20 +268,24 @@ impl Serialize for MessageDescriptionValue {
                                             continue;
                                         }
                                     };
+
                                     state.serialize_entry(&key, &value)?;
                                 }
+
                                 _ => {
                                     //unexpected
                                     continue;
                                 }
                             }
                         }
+
                         _ => {
                             //unexpected
                             continue;
                         }
                     }
                 }
+
                 state.end()
             }
         }
@@ -289,6 +303,7 @@ fn get_jsx_message_descriptor_value_maybe_object(
     if value.is_none() {
         return None;
     }
+
     let value = value.as_ref().expect("Should be available");
 
     // NOTE: do not support evaluatePath
@@ -308,14 +323,17 @@ fn get_jsx_message_descriptor_value_maybe_object(
                     Expr::Lit(Lit::Str(s)) => {
                         Some(MessageDescriptionValue::Str(s.value.to_string()))
                     }
+
                     Expr::Object(object_lit) => {
                         Some(MessageDescriptionValue::Obj(object_lit.clone()))
                     }
+
                     _ => None,
                 },
                 _ => None,
             }
         }
+
         JSXAttrValue::Lit(Lit::Str(s)) => Some(MessageDescriptionValue::Str(s.value.to_string())),
         _ => None,
     }
@@ -353,6 +371,7 @@ fn get_jsx_icu_message_value(
 
     let message = if !preserve_whitespace {
         let message = WHITESPACE_REGEX.replace_all(&message, " ");
+
         message.trim().to_string()
     } else {
         message
@@ -397,6 +416,7 @@ fn get_jsx_icu_message_value(
                     "#,
                         )
                         .emit();
+
                     handler
                         .struct_err(&format!("SyntaxError: {}", e.kind))
                         .emit()
@@ -421,6 +441,7 @@ fn get_call_expr_icu_message_value(
 
     let message = if !preserve_whitespace {
         let message = WHITESPACE_REGEX.replace_all(&message, " ");
+
         message.trim().to_string()
     } else {
         message
@@ -442,6 +463,7 @@ fn get_call_expr_icu_message_value(
                     "#,
                     )
                     .emit();
+
                 handler
                     .struct_err(&format!("SyntaxError: {}", e.kind))
                     .emit()
@@ -494,6 +516,7 @@ fn interpolate_name(_resource_path: &str, name: &str, content: &str) -> Option<S
       */
 
     let mut url = filename.to_string();
+
     let r = Regexp::new(r#"\[(?:([^:\]]+):)?(?:hash|contenthash)(?::([a-z]+\d*))?(?::(\d+))?\]"#)
         .unwrap();
 
@@ -501,12 +524,16 @@ fn interpolate_name(_resource_path: &str, name: &str, content: &str) -> Option<S
         .replace(url.as_str(), |cap: &Captures| {
             // let hash_type = cap.get(1);
             // let digest_type = cap.get(2);
+
             let max_length = cap.get(3);
 
             // TODO: support hashtype
             let mut hasher = Sha512::new();
+
             hasher.update(content.as_bytes());
+
             let hash = hasher.finalize();
+
             let base64_hash = Base64::encode_string(&hash);
 
             if let Some(max_length) = max_length {
@@ -536,6 +563,7 @@ fn evaluate_jsx_message_descriptor(
     filename: &str,
 ) -> MessageDescriptor {
     let id = get_jsx_message_descriptor_value(&descriptor_path.id, None);
+
     let default_message = get_jsx_icu_message_value(
         &descriptor_path.default_message,
         options.preserve_whitespace,
@@ -577,6 +605,7 @@ fn evaluate_call_expr_message_descriptor(
     filename: &str,
 ) -> MessageDescriptor {
     let id = get_call_expr_message_descriptor_value(&descriptor_path.id, None);
+
     let default_message = get_call_expr_icu_message_value(
         &descriptor_path.default_message,
         options.preserve_whitespace,
@@ -598,6 +627,7 @@ fn evaluate_call_expr_message_descriptor(
         } else {
             default_message.clone()
         };
+
         interpolate_name(filename, interpolate_pattern, &content)
     } else {
         id
@@ -664,6 +694,7 @@ fn store_message(
 fn get_message_object_from_expression(expr: Option<&mut ExprOrSpread>) -> Option<&mut Expr> {
     if let Some(expr) = expr {
         let expr = &mut *expr.expr;
+
         Some(expr)
     } else {
         None
@@ -751,17 +782,22 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
         filename: &str,
     ) -> Self {
         let mut function_names: HashSet<String> = Default::default();
+
         plugin_options
             .additional_function_names
             .iter()
             .for_each(|name| {
                 function_names.insert(name.to_string());
             });
+
         function_names.insert("formatMessage".to_string());
+
         function_names.insert("$formatMessage".to_string());
 
         let mut component_names: HashSet<String> = Default::default();
+
         component_names.insert("FormattedMessage".to_string());
+
         plugin_options
             .additional_component_names
             .iter()
@@ -784,18 +820,23 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
     fn read_pragma(&mut self, span_lo: BytePos, span_hi: BytePos) {
         if let Some(pragma) = &self.options.pragma {
             let mut comments = self.comments.get_leading(span_lo).unwrap_or_default();
+
             comments.append(&mut self.comments.get_leading(span_hi).unwrap_or_default());
 
             let pragma = pragma.as_str();
 
             for comment in comments {
                 let comment_text = &*comment.text;
+
                 if comment_text.contains(pragma) {
                     let value = comment_text.split(pragma).nth(1);
+
                     if let Some(value) = value {
                         let value = WHITESPACE_REGEX.split(value.trim());
+
                         for kv in value {
                             let mut kv = kv.split(":");
+
                             if let Some(k) = kv.next() {
                                 if let Some(v) = kv.next() {
                                     self.meta.insert(k.to_string(), v.to_string());
@@ -859,13 +900,16 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
                             };
                         }
                     }
+
                     false
                 });
 
                 if let Some(descriptor_id) = descriptor.id {
                     if let Some(id_prop) = id_prop {
                         let prop = id_prop.as_prop().unwrap();
+
                         let kv = &mut prop.as_key_value().unwrap();
+
                         kv.to_owned().value = Box::new(Expr::Lit(Lit::Str(Str {
                             span: DUMMY_SP,
                             value: descriptor_id.into(),
@@ -887,11 +931,13 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
                 }
 
                 let mut props = vec![];
+
                 for prop in obj.props.drain(..) {
                     match prop {
                         PropOrSpread::Prop(mut prop) => {
                             if let Prop::KeyValue(keyvalue) = &mut *prop {
                                 let key = get_message_descriptor_key_from_call_expr(&keyvalue.key);
+
                                 if let Some(key) = key {
                                     match key {
                                         "description" => {
@@ -917,9 +963,11 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
                                                                 false, false, false, false, None,
                                                             ),
                                                         );
+
                                                         if let Ok(parsed) = parser.parse() {
                                                             let v = serde_json::to_value(&parsed)
                                                                 .unwrap();
+
                                                             keyvalue.value = json_value_to_expr(&v);
                                                         }
                                                     } else {
@@ -937,6 +985,7 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
                                                 props.push(PropOrSpread::Prop(prop));
                                             }
                                         }
+
                                         _ => props.push(PropOrSpread::Prop(prop)),
                                     }
                                 } else {
@@ -946,6 +995,7 @@ impl<C: Clone + Comments, S: SourceMapper> FormatJSVisitor<C, S> {
                                 props.push(PropOrSpread::Prop(prop));
                             }
                         }
+
                         _ => props.push(prop),
                     }
                 }
@@ -1011,6 +1061,7 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
                     false
                 }
             }
+
             _ => false,
         });
 
@@ -1039,10 +1090,12 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
         }
 
         let mut attrs = vec![];
+
         for attr in jsx_opening_elem.attrs.drain(..) {
             match attr {
                 JSXAttrOrSpread::JSXAttr(attr) => {
                     let key = get_message_descriptor_key_from_jsx(&attr.name);
+
                     match key {
                         "description" => {
                             // remove description
@@ -1074,9 +1127,11 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
                                 attrs.push(JSXAttrOrSpread::JSXAttr(attr))
                             }
                         }
+
                         _ => attrs.push(JSXAttrOrSpread::JSXAttr(attr)),
                     }
                 }
+
                 _ => attrs.push(attr),
             }
         }
@@ -1090,12 +1145,14 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
         call_expr.visit_mut_children_with(self);
 
         let callee = &call_expr.callee;
+
         let args = &mut call_expr.args;
 
         if let Callee::Expr(callee_expr) = callee {
             if let Expr::Ident(ident) = &**callee_expr {
                 if &*ident.sym == "defineMessage" || &*ident.sym == "defineMessages" {
                     let first_arg = args.get_mut(0);
+
                     let mut message_obj = get_message_object_from_expression(first_arg);
 
                     assert_object_expression(&message_obj, callee);
@@ -1126,11 +1183,13 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
                         false
                     }
                 }
+
                 _ => false,
             };
 
             if is_format_message_call {
                 let message_descriptor = args.get_mut(0);
+
                 if let Some(message_descriptor) = message_descriptor {
                     if message_descriptor.expr.is_object() {
                         self.process_message_object(&mut Some(message_descriptor.expr.as_mut()));
@@ -1149,12 +1208,14 @@ impl<C: Clone + Comments, S: SourceMapper> VisitMut for FormatJSVisitor<C, S> {
 
         for item in items {
             self.read_pragma(item.span().lo, item.span().hi);
+
             item.visit_mut_children_with(self);
         }
 
         if self.options.__debug_extracted_messages_comment {
             let messages_json_str =
                 serde_json::to_string(&self.messages).expect("Should be serializable");
+
             let meta_json_str = serde_json::to_string(&self.meta).expect("Should be serializable");
 
             // Append extracted messages to the end of the file as stringified JSON
@@ -1183,6 +1244,7 @@ fn json_value_to_expr(json_value: &serde_json::Value) -> Box<Expr> {
         serde_json::Value::Null => {
             Expr::Lit(Lit::Null(swc_core::ecma::ast::Null { span: DUMMY_SP }))
         }
+
         serde_json::Value::Bool(v) => Expr::Lit(Lit::Bool(Bool {
             span: DUMMY_SP,
             value: *v,

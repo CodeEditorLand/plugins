@@ -53,14 +53,17 @@ pub fn transform_css(
         css_modules: false,
         ..Default::default()
     };
+
     let lexer = Lexer::new(
         StringInput::new(&css_str, style_info.css_span.lo, style_info.css_span.hi),
         None,
         config,
     );
+
     let mut parser = Parser::new(lexer, config);
 
     let result: Result<Stylesheet, _> = parser.parse_all();
+
     let mut ss = match result {
         Ok(ss) => ss,
         Err(err) => {
@@ -78,11 +81,13 @@ pub fn transform_css(
                     .note(&format!("Input to the css parser is {}", style_info.css))
                     .emit()
             });
+
             bail!("Failed to parse css");
         }
     };
     // ? Do we need to support optionally prefixing?
     ss.visit_mut_with(&mut prefixer(Default::default()));
+
     ss.visit_mut_with(&mut Namespacer {
         class_name: match class_name {
             Some(s) => s.clone(),
@@ -99,6 +104,7 @@ pub fn transform_css(
     let mut s = String::new();
     {
         let mut wr = BasicCssWriter::new(&mut s, None, BasicCssWriterConfig::default());
+
         let mut gen = CodeGenerator::new(&mut wr, CodegenConfig { minify: true });
 
         gen.emit(&ss).unwrap();
@@ -111,10 +117,14 @@ pub fn transform_css(
     }
 
     let mut parts: Vec<&str> = s.split("--styled-jsx-placeholder-").collect();
+
     let mut final_expressions = vec![];
+
     for i in parts.iter_mut().skip(1) {
         let (num_len, expression_index) = read_number(i, &style_info.is_expr_property);
+
         final_expressions.push(style_info.expressions[expression_index].clone());
+
         let substr = &i[num_len + 2..];
         *i = substr;
     }
@@ -152,6 +162,7 @@ impl VisitMut for Namespacer {
             let mut code = String::new();
             {
                 let mut wr = BasicCssWriter::new(&mut code, None, BasicCssWriterConfig::default());
+
                 let mut gen = CodeGenerator::new(&mut wr, CodegenConfig { minify: true });
 
                 gen.emit(&*node).unwrap();
@@ -169,6 +180,7 @@ impl VisitMut for Namespacer {
         };
 
         let mut new_selectors = vec![];
+
         let mut combinator = None;
 
         for sel in node.children.take() {
@@ -185,12 +197,14 @@ impl VisitMut for Namespacer {
                                     )
                                     .emit()
                             });
+
                             new_selectors.push(sel);
                         }
                     }
 
                     combinator = None;
                 }
+
                 ComplexSelectorChildren::Combinator(v) => {
                     combinator = Some(v.clone());
                 }
@@ -223,6 +237,7 @@ impl Namespacer {
 
                     continue;
                 }
+
                 _ => continue,
             };
 
@@ -238,8 +253,10 @@ impl Namespacer {
                         }
                     })
                     .collect::<Vec<TokenAndSpan>>();
+
                 let mut tokens = {
                     let lo = tokens.first().map(|v| v.span_lo()).unwrap_or(BytePos(0));
+
                     let hi = tokens.last().map(|v| v.span_hi()).unwrap_or(BytePos(0));
 
                     Tokens {
@@ -270,6 +287,7 @@ impl Namespacer {
                         &mut vec![],
                     )
                     .unwrap();
+
                     x
                 });
 
@@ -290,6 +308,7 @@ impl Namespacer {
                         }
 
                         trace!("Combinator: {:?}", combinator);
+
                         trace!("v[0]: {:?}", v[0]);
 
                         let mut result = vec![];
@@ -300,6 +319,7 @@ impl Namespacer {
                                 // above
                                 Some(ComplexSelectorChildren::Combinator(..))
                                     if combinator.value == CombinatorValue::Descendant => {}
+
                                 _ => {
                                     result.push(ComplexSelectorChildren::Combinator(combinator));
                                 }
@@ -319,6 +339,7 @@ impl Namespacer {
 
                         Ok(result)
                     }
+
                     Err(_) => bail!("Failed to transform one off global selector"),
                 };
             }
@@ -328,6 +349,7 @@ impl Namespacer {
             true => "__jsx-style-dynamic-selector",
             false => &self.class_name,
         };
+
         let insert_index = match pseudo_index {
             None => node.subclass_selectors.len(),
             Some(i) => i,
@@ -361,6 +383,7 @@ impl Namespacer {
 
 fn get_front_selector_tokens(selector_tokens: &Tokens) -> Vec<TokenAndSpan> {
     let start_pos = selector_tokens.span.lo.to_u32() - 2;
+
     vec![
         TokenAndSpan {
             span: Span {

@@ -73,12 +73,14 @@ where
                         .struct_span_err(*span, "markAsPure() does not support multiple arguments")
                         .emit();
                 });
+
                 return;
             }
 
             *e = *args[0].expr.take();
 
             let mut lo = e.span().lo;
+
             if lo.is_dummy() {
                 lo = Span::dummy_with_cmt().lo;
             }
@@ -101,6 +103,7 @@ where
         if let ModuleItem::ModuleDecl(ModuleDecl::Import(import)) = m {
             if import.src.value == self.config.import_path {
                 *m = ModuleItem::Stmt(Stmt::Empty(EmptyStmt { span: DUMMY_SP }));
+
                 return;
             }
         }

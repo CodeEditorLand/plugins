@@ -27,6 +27,7 @@ impl VisitMut for Minify {
         let Expr::TaggedTpl(tagged) = expr else {
             return;
         };
+
         if !self.state.borrow().is_styled(&tagged.tag)
             && !self.state.borrow().is_helper(&tagged.tag)
         {
@@ -50,6 +51,7 @@ impl VisitMut for Minify {
                 raw,
             })
             .collect();
+
         if let Some(q) = tagged.tpl.quasis.last_mut() {
             q.tail = true;
         }
@@ -59,8 +61,10 @@ impl VisitMut for Minify {
         // babel-plugin-styled-components does.
         {
             let mut idx: usize = 0;
+
             tagged.tpl.exprs.retain(|_| {
                 idx += 1;
+
                 retained_expression_indices.contains(&(idx - 1))
             });
         }

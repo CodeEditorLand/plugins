@@ -92,6 +92,7 @@ impl Visit for Analyzer<'_> {
                     self.data
                         .namespace_imports
                         .insert(s.local.to_id(), (import.src.value.clone(), s.local.span));
+
                     continue;
                 }
             };

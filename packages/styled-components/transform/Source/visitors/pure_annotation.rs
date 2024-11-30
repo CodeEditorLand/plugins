@@ -42,6 +42,7 @@ where
             Expr::TaggedTpl(TaggedTpl { span, tag, .. }) => (tag, span),
             _ => return,
         };
+
         if !self.state.borrow().is_styled(callee_or_tag)
             && !self.state.borrow().is_pure_helper(callee_or_tag)
         {
@@ -51,6 +52,7 @@ where
         if span.is_dummy_ignoring_cmt() {
             *span = Span::dummy_with_cmt();
         }
+
         if !self.comments.has_flag(span.lo, "PURE") {
             self.comments.add_pure_comment(span.lo);
         }

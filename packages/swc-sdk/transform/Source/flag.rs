@@ -76,6 +76,7 @@ where
     /// ```
     pub(super) fn transform_flag(&mut self, v: &mut VarDeclarator) -> Option<!> {
         let init = v.init.as_deref_mut()?;
+
         let call_expr = init.as_mut_call()?;
 
         let callee = call_expr.callee.as_mut_expr()?;
@@ -98,6 +99,7 @@ where
                             .emit();
                     });
                 }
+
                 return None;
             }
         };
@@ -124,6 +126,7 @@ where
                     Prop::KeyValue(KeyValueProp { key, .. }) => {
                         matches!(key, PropName::Ident(i) if i.sym == "key")
                     }
+
                     _ => false,
                 })
             {
@@ -151,8 +154,10 @@ fn find_object(arg: &mut Expr) -> Option<&mut ObjectLit> {
             }
 
             let arg = call.args.get_mut(0)?;
+
             find_object(&mut arg.expr)
         }
+
         _ => None,
     }
 }

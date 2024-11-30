@@ -16,7 +16,9 @@ fn swc_plugin(program: Program, data: TransformPluginProgramMetadata) -> Program
     .unwrap_or_default();
 
     let source_map = std::sync::Arc::new(data.source_map);
+
     let pos = source_map.lookup_char_pos(program.span().lo);
+
     let hash = format!("{:x}", pos.file.src_hash);
 
     program.apply(swc_prefresh::swc_prefresh(config, hash))
