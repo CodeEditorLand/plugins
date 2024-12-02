@@ -24,8 +24,5 @@
 			"taplo format"
 		]
 	},
-	"name": "swc-plugins",
-	"scripts": {
-		"prepare": "husky install"
-	}
+	"name": "swc-plugins"
 }
