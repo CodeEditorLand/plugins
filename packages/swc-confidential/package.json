@@ -1,13 +1,13 @@
 {
-	"dependencies": {
-		"@codeeditorland/counter": "^0.1.3"
-	},
-	"description": "SWC plugin for swc-confidential",
-	"devDependencies": {},
-	"main": "swc_plugin_swc_confidential.wasm",
 	"name": "@codeeditorland/plugin-swc-confidential",
-	"preferUnplugged": true,
+	"description": "SWC plugin for swc-confidential",
+	"main": "swc_plugin_swc_confidential.wasm",
 	"scripts": {
 		"prepack": "cargo build --release -p swc_plugin_swc_confidential --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_swc_confidential.wasm ."
-	}
+	},
+	"dependencies": {
+		"@codeeditorland/counter": "0.0.1"
+	},
+	"devDependencies": {},
+	"preferUnplugged": true
 }

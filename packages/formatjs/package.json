@@ -1,13 +1,13 @@
 {
-	"dependencies": {
-		"@codeeditorland/counter": "^0.1.3"
-	},
-	"description": "FormatJS SWC plugin",
-	"devDependencies": {},
-	"main": "swc_plugin_formatjs.wasm",
 	"name": "@codeeditorland/plugin-formatjs",
-	"preferUnplugged": true,
+	"description": "FormatJS SWC plugin",
+	"main": "swc_plugin_formatjs.wasm",
 	"scripts": {
 		"prepack": "cargo build --release -p swc_plugin_formatjs --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_formatjs.wasm ."
-	}
+	},
+	"dependencies": {
+		"@codeeditorland/counter": "0.0.1"
+	},
+	"devDependencies": {},
+	"preferUnplugged": true
 }

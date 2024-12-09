@@ -1,13 +1,13 @@
 {
-	"dependencies": {
-		"@codeeditorland/counter": "^0.1.3"
-	},
-	"description": "SWC plugin for styled-jsx",
-	"devDependencies": {},
-	"main": "swc_plugin_styled_jsx.wasm",
 	"name": "@codeeditorland/plugin-styled-jsx",
-	"preferUnplugged": true,
+	"description": "SWC plugin for styled-jsx",
+	"main": "swc_plugin_styled_jsx.wasm",
 	"scripts": {
 		"prepack": "cargo build --release -p swc_plugin_styled_jsx --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_styled_jsx.wasm ."
-	}
+	},
+	"dependencies": {
+		"@codeeditorland/counter": "0.0.1"
+	},
+	"devDependencies": {},
+	"preferUnplugged": true
 }

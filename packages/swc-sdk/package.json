@@ -1,13 +1,13 @@
 {
-	"dependencies": {
-		"@codeeditorland/counter": "^0.1.3"
-	},
-	"description": "SWC plugin for swc-sdk",
-	"devDependencies": {},
-	"main": "swc_plugin_swc_sdk.wasm",
 	"name": "@codeeditorland/plugin-swc-sdk",
-	"preferUnplugged": true,
+	"description": "SWC plugin for swc-sdk",
+	"main": "swc_plugin_swc_sdk.wasm",
 	"scripts": {
 		"prepack": "cargo build --release -p swc_plugin_swc_sdk --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_swc_sdk.wasm ."
-	}
+	},
+	"dependencies": {
+		"@codeeditorland/counter": "0.0.1"
+	},
+	"devDependencies": {},
+	"preferUnplugged": true
 }
