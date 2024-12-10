@@ -59,7 +59,7 @@ swc_ecma_parser             = "6.0.0"
 swc_ecma_transforms         = "8.0.0"
 swc_ecma_transforms_base    = "6.0.2"
 swc_ecma_transforms_react   = "6.0.0"
-swc_ecma_transforms_testing = "6.0.0"
+swc_ecma_transforms_testing = { version = "6.0.0" }
 swc_ecma_utils              = "6.0.0"
 swc_ecma_visit              = "5.0.0"
 swc_plugin_macro            = "1.0.0"
