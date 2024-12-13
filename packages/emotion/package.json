@@ -6,7 +6,7 @@
 		"prepack": "cargo build --release -p swc_plugin_emotion --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_emotion.wasm ."
 	},
 	"dependencies": {
-		"@codeeditorland/counter": "^0.1.3"
+		"@codeeditorland/counter": "0.1.3"
 	},
 	"devDependencies": {},
 	"preferUnplugged": true
