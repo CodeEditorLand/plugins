@@ -1,12 +1,13 @@
 {
-	"name": "@swc/plugin-prefresh",
+	"name": "@codeeditorland/plugin-prefresh",
 	"description": "SWC plugin for preact refresh",
 	"main": "swc_plugin_prefresh.wasm",
 	"scripts": {
 		"prepack": "cargo build --release -p swc_plugin_prefresh --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_prefresh.wasm ."
 	},
 	"dependencies": {
-		"@swc/counter": "^0.1.3"
+		"@codeeditorland/counter": "^0.1.3"
 	},
+	"devDependencies": {},
 	"preferUnplugged": true
 }
