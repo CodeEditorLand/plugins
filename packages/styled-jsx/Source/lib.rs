@@ -3,7 +3,7 @@
 
 use styled_jsx::{visitor, visitor::Config};
 use swc_core::{
-	common::{sync::Lrc, FileName, SourceMap},
+	common::{FileName, SourceMap, sync::Lrc},
 	ecma::{ast::Program, visit::FoldWith},
 	plugin::{plugin_transform, proxies::TransformPluginProgramMetadata},
 };

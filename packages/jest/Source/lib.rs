@@ -5,8 +5,8 @@ use serde::Deserialize;
 use swc_common::util::take::Take;
 use swc_core::plugin::proxies::TransformPluginProgramMetadata;
 use swc_ecma_ast::*;
-use swc_ecma_utils::{prepend_stmts, StmtLike};
-use swc_ecma_visit::{noop_visit_mut_type, VisitMut, VisitMutWith};
+use swc_ecma_utils::{StmtLike, prepend_stmts};
+use swc_ecma_visit::{VisitMut, VisitMutWith, noop_visit_mut_type};
 use swc_plugin_macro::plugin_transform;
 
 static HOIST_METHODS:phf::Set<&str> =

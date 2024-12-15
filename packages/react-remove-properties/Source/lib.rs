@@ -1,18 +1,18 @@
 #![allow(clippy::not_unsafe_ptr_arg_deref)]
 use swc_core::{
-    ecma::ast::Program,
-    plugin::{plugin_transform, proxies::TransformPluginProgramMetadata},
+	ecma::ast::Program,
+	plugin::{plugin_transform, proxies::TransformPluginProgramMetadata},
 };
 
 #[plugin_transform]
-fn swc_plugin(program: Program, data: TransformPluginProgramMetadata) -> Program {
-    let config = serde_json::from_str::<Option<react_remove_properties::Config>>(
-        &data
-            .get_transform_plugin_config()
-            .expect("failed to get plugin config for react-remove-properties"),
-    )
-    .expect("invalid packages")
-    .unwrap_or(react_remove_properties::Config::All(true));
+fn swc_plugin(program:Program, data:TransformPluginProgramMetadata) -> Program {
+	let config = serde_json::from_str::<Option<react_remove_properties::Config>>(
+		&data
+			.get_transform_plugin_config()
+			.expect("failed to get plugin config for react-remove-properties"),
+	)
+	.expect("invalid packages")
+	.unwrap_or(react_remove_properties::Config::All(true));
 
-    program.apply(react_remove_properties::react_remove_properties(config))
+	program.apply(react_remove_properties::react_remove_properties(config))
 }
