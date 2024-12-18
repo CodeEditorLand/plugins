@@ -3,136 +3,136 @@ use serde::Serialize;
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CompactDisplay {
-    Short,
-    Long,
+	Short,
+	Long,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Notation {
-    Standard,
-    Scientific,
-    Engineering,
-    Compact,
+	Standard,
+	Scientific,
+	Engineering,
+	Compact,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum UnitDisplay {
-    Short,
-    Long,
-    Narrow,
+	Short,
+	Long,
+	Narrow,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsTrailingZeroDisplay {
-    Auto,
-    StripIfInteger,
+	Auto,
+	StripIfInteger,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsRoundingPriority {
-    Auto,
-    MorePrecision,
-    LessPrecision,
+	Auto,
+	MorePrecision,
+	LessPrecision,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum LocaleMatcherFormatOptions {
-    Lookup,
-    #[serde(rename = "best fit")]
-    BestFit,
+	Lookup,
+	#[serde(rename = "best fit")]
+	BestFit,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsStyle {
-    Decimal,
-    Percent,
-    Currency,
-    Unit,
+	Decimal,
+	Percent,
+	Currency,
+	Unit,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsCurrencyDisplay {
-    Symbol,
-    Code,
-    Name,
-    NarrowSymbol,
+	Symbol,
+	Code,
+	Name,
+	NarrowSymbol,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsCurrencySign {
-    Standard,
-    Accounting,
+	Standard,
+	Accounting,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NumberFormatOptionsSignDisplay {
-    Auto,
-    Always,
-    Never,
-    ExceptZero,
+	Auto,
+	Always,
+	Never,
+	ExceptZero,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DateTimeFormatMatcher {
-    Basic,
-    #[serde(rename = "best fit")]
-    BestFit,
+	Basic,
+	#[serde(rename = "best fit")]
+	BestFit,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DateTimeFormatStyle {
-    Full,
-    Long,
-    Medium,
-    Short,
+	Full,
+	Long,
+	Medium,
+	Short,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DateTimeDisplayFormat {
-    Numeric,
-    #[serde(rename = "2-digit")]
-    TwoDigit,
+	Numeric,
+	#[serde(rename = "2-digit")]
+	TwoDigit,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DateTimeMonthDisplayFormat {
-    Numeric,
-    #[serde(rename = "2-digit")]
-    TwoDigit,
-    Long,
-    Short,
-    Narrow,
+	Numeric,
+	#[serde(rename = "2-digit")]
+	TwoDigit,
+	Long,
+	Short,
+	Narrow,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TimeZoneNameFormat {
-    Short,
-    Long,
-    ShortOffset,
-    LongOffset,
-    ShortGeneric,
-    LongGeneric,
+	Short,
+	Long,
+	ShortOffset,
+	LongOffset,
+	ShortGeneric,
+	LongGeneric,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HourCycle {
-    H11,
-    H12,
-    H23,
-    H24,
+	H11,
+	H12,
+	H23,
+	H24,
 }

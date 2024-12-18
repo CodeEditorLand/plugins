@@ -4,7 +4,13 @@ use import_analyzer::ImportMap;
 use serde::Deserialize;
 use swc_atoms::Atom;
 use swc_common::{
-    comments::Comments, errors::HANDLER, util::take::Take, Mark, Span, Spanned, DUMMY_SP,
+	DUMMY_SP,
+	Mark,
+	Span,
+	Spanned,
+	comments::Comments,
+	errors::HANDLER,
+	util::take::Take,
 };
 use swc_ecma_ast::{CallExpr, Callee, EmptyStmt, Expr, Module, ModuleDecl, ModuleItem, Stmt};
 use swc_ecma_visit::{VisitMut, VisitMutWith};
@@ -13,101 +19,83 @@ mod import_analyzer;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
-    #[serde(default = "default_import_path")]
-    pub import_path: Atom,
+	#[serde(default = "default_import_path")]
+	pub import_path:Atom,
 }
 
-fn default_import_path() -> Atom {
-    Atom::from("@swc/magic")
-}
+fn default_import_path() -> Atom { Atom::from("@swc/magic") }
 
 impl Config {}
 
-pub fn swc_magic<C>(_unreolved_mark: Mark, config: Config, comments: C) -> impl VisitMut
+pub fn swc_magic<C>(_unreolved_mark:Mark, config:Config, comments:C) -> impl VisitMut
 where
-    C: Comments,
-{
-    Magic {
-        config,
-        comments,
-        imports: Default::default(),
-    }
+	C: Comments, {
+	Magic { config, comments, imports:Default::default() }
 }
 
-const MARK_AS_PURE_FN_NAME: &str = "markAsPure";
+const MARK_AS_PURE_FN_NAME:&str = "markAsPure";
 
 /// Handles functions from `@swc/magic`.
 struct Magic<C>
 where
-    C: Comments,
-{
-    config: Config,
-    comments: C,
-    imports: ImportMap,
+	C: Comments, {
+	config:Config,
+	comments:C,
+	imports:ImportMap,
 }
 
 impl<C> VisitMut for Magic<C>
 where
-    C: Comments,
+	C: Comments,
 {
-    fn visit_mut_expr(&mut self, e: &mut Expr) {
-        e.visit_mut_children_with(self);
+	fn visit_mut_expr(&mut self, e:&mut Expr) {
+		e.visit_mut_children_with(self);
 
-        if let Expr::Call(CallExpr {
-            span,
-            callee: Callee::Expr(callee),
-            args,
-            ..
-        }) = e
-        {
-            if !self
-                .imports
-                .is_import(callee, &self.config.import_path, MARK_AS_PURE_FN_NAME)
-            {
-                return;
-            }
+		if let Expr::Call(CallExpr { span, callee: Callee::Expr(callee), args, .. }) = e {
+			if !self.imports.is_import(callee, &self.config.import_path, MARK_AS_PURE_FN_NAME) {
+				return;
+			}
 
-            if args.len() != 1 {
-                HANDLER.with(|handler| {
-                    handler
-                        .struct_span_err(*span, "markAsPure() does not support multiple arguments")
-                        .emit();
-                });
+			if args.len() != 1 {
+				HANDLER.with(|handler| {
+					handler
+						.struct_span_err(*span, "markAsPure() does not support multiple arguments")
+						.emit();
+				});
 
-                return;
-            }
+				return;
+			}
 
-            *e = *args[0].expr.take();
+			*e = *args[0].expr.take();
 
-            let mut lo = e.span().lo;
+			let mut lo = e.span().lo;
 
-            if lo.is_dummy() {
-                lo = Span::dummy_with_cmt().lo;
-            }
+			if lo.is_dummy() {
+				lo = Span::dummy_with_cmt().lo;
+			}
 
-            self.comments.add_pure_comment(lo);
-        }
-    }
+			self.comments.add_pure_comment(lo);
+		}
+	}
 
-    fn visit_mut_module(&mut self, m: &mut Module) {
-        self.imports = ImportMap::analyze(m);
+	fn visit_mut_module(&mut self, m:&mut Module) {
+		self.imports = ImportMap::analyze(m);
 
-        m.visit_mut_children_with(self);
+		m.visit_mut_children_with(self);
 
-        // Remove Stmt::Empty
-        m.body
-            .retain(|item| !matches!(item, ModuleItem::Stmt(Stmt::Empty(..))));
-    }
+		// Remove Stmt::Empty
+		m.body.retain(|item| !matches!(item, ModuleItem::Stmt(Stmt::Empty(..))));
+	}
 
-    fn visit_mut_module_item(&mut self, m: &mut ModuleItem) {
-        if let ModuleItem::ModuleDecl(ModuleDecl::Import(import)) = m {
-            if import.src.value == self.config.import_path {
-                *m = ModuleItem::Stmt(Stmt::Empty(EmptyStmt { span: DUMMY_SP }));
+	fn visit_mut_module_item(&mut self, m:&mut ModuleItem) {
+		if let ModuleItem::ModuleDecl(ModuleDecl::Import(import)) = m {
+			if import.src.value == self.config.import_path {
+				*m = ModuleItem::Stmt(Stmt::Empty(EmptyStmt { span:DUMMY_SP }));
 
-                return;
-            }
-        }
+				return;
+			}
+		}
 
-        m.visit_mut_children_with(self);
-    }
+		m.visit_mut_children_with(self);
+	}
 }

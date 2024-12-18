@@ -2,72 +2,61 @@
 
 use std::{cell::RefCell, iter, rc::Rc};
 
-use swc_common::{util::take::Take, DUMMY_SP};
+use swc_common::{DUMMY_SP, util::take::Take};
 use swc_ecma_ast::*;
-use swc_ecma_visit::{noop_visit_mut_type, visit_mut_pass, VisitMut, VisitMutWith};
+use swc_ecma_visit::{VisitMut, VisitMutWith, noop_visit_mut_type, visit_mut_pass};
 
 use crate::utils::State;
 
-pub fn template_literals(state: Rc<RefCell<State>>) -> impl Pass + VisitMut {
-    visit_mut_pass(TemplateLiterals { state })
+pub fn template_literals(state:Rc<RefCell<State>>) -> impl Pass + VisitMut {
+	visit_mut_pass(TemplateLiterals { state })
 }
 
 #[derive(Debug)]
 struct TemplateLiterals {
-    state: Rc<RefCell<State>>,
+	state:Rc<RefCell<State>>,
 }
 
 impl VisitMut for TemplateLiterals {
-    noop_visit_mut_type!();
+	noop_visit_mut_type!();
 
-    fn visit_mut_expr(&mut self, expr: &mut Expr) {
-        expr.visit_mut_children_with(self);
+	fn visit_mut_expr(&mut self, expr:&mut Expr) {
+		expr.visit_mut_children_with(self);
 
-        let Expr::TaggedTpl(tagged) = expr else {
-            return;
-        };
+		let Expr::TaggedTpl(tagged) = expr else {
+			return;
+		};
 
-        if !self.state.borrow().is_styled(&tagged.tag)
-            && !self.state.borrow().is_helper(&tagged.tag)
-        {
-            return;
-        }
+		if !self.state.borrow().is_styled(&tagged.tag)
+			&& !self.state.borrow().is_helper(&tagged.tag)
+		{
+			return;
+		}
 
-        expr.map_with_mut(|expr| {
-            let tagged = expr.expect_tagged_tpl();
+		expr.map_with_mut(|expr| {
+			let tagged = expr.expect_tagged_tpl();
 
-            let quasis = tagged
-                .tpl
-                .quasis
-                .into_iter()
-                .map(|q| {
-                    Expr::Tpl(Tpl {
-                        span: q.span,
-                        exprs: vec![],
-                        quasis: vec![q],
-                    })
-                })
-                .map(ExprOrSpread::from)
-                .map(Some);
+			let quasis = tagged
+				.tpl
+				.quasis
+				.into_iter()
+				.map(|q| Expr::Tpl(Tpl { span:q.span, exprs:vec![], quasis:vec![q] }))
+				.map(ExprOrSpread::from)
+				.map(Some);
 
-            let exprs = tagged.tpl.exprs.into_iter().map(ExprOrSpread::from);
+			let exprs = tagged.tpl.exprs.into_iter().map(ExprOrSpread::from);
 
-            let args = iter::once(
-                Expr::Array(ArrayLit {
-                    span: DUMMY_SP,
-                    elems: quasis.collect(),
-                })
-                .into(),
-            )
-            .chain(exprs)
-            .collect();
+			let args =
+				iter::once(Expr::Array(ArrayLit { span:DUMMY_SP, elems:quasis.collect() }).into())
+					.chain(exprs)
+					.collect();
 
-            Expr::Call(CallExpr {
-                span: tagged.span,
-                callee: tagged.tag.into(),
-                args,
-                ..Default::default()
-            })
-        });
-    }
+			Expr::Call(CallExpr {
+				span:tagged.span,
+				callee:tagged.tag.into(),
+				args,
+				..Default::default()
+			})
+		});
+	}
 }

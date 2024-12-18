@@ -4,39 +4,34 @@ use swc_atoms::Atom;
 
 #[derive(Debug, Clone, Deserialize, SerdeDefault)]
 pub struct Config {
-    #[serde(default)]
-    pub flag: FlagConfig,
+	#[serde(default)]
+	pub flag:FlagConfig,
 
-    /// Drop imports from the following modules.
-    #[serde(default = "default_remove_imports_from")]
-    pub remove_imports_from: Vec<Atom>,
+	/// Drop imports from the following modules.
+	#[serde(default = "default_remove_imports_from")]
+	pub remove_imports_from:Vec<Atom>,
 }
 
 #[derive(Debug, Clone, Deserialize, SerdeDefault)]
 pub struct FlagConfig {
-    /// If true,
-    ///
-    /// - the variable name must be an identifier.
-    #[serde(default)]
-    pub strict: bool,
+	/// If true,
+	///
+	/// - the variable name must be an identifier.
+	#[serde(default)]
+	pub strict:bool,
 
-    #[serde(default = "default_flag_import_source")]
-    pub import_sources: Vec<ImportItem>,
+	#[serde(default = "default_flag_import_source")]
+	pub import_sources:Vec<ImportItem>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ImportItem {
-    pub module: Atom,
-    pub name: Atom,
+	pub module:Atom,
+	pub name:Atom,
 }
 
-fn default_remove_imports_from() -> Vec<Atom> {
-    vec![Atom::new("@swc/sdk/annotations")]
-}
+fn default_remove_imports_from() -> Vec<Atom> { vec![Atom::new("@swc/sdk/annotations")] }
 
 fn default_flag_import_source() -> Vec<ImportItem> {
-    vec![ImportItem {
-        module: Atom::new("@swc/sdk/flag"),
-        name: Atom::new("flag"),
-    }]
+	vec![ImportItem { module:Atom::new("@swc/sdk/flag"), name:Atom::new("flag") }]
 }
