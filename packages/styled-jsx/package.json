@@ -1,13 +1,25 @@
 {
-	"name": "@codeeditorland/plugin-styled-jsx",
-	"description": "SWC plugin for styled-jsx",
-	"main": "swc_plugin_styled_jsx.wasm",
-	"scripts": {
-		"prepack": "cargo build --release -p swc_plugin_styled_jsx --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_styled_jsx.wasm ."
-	},
-	"dependencies": {
-		"@codeeditorland/counter": "0.1.3"
-	},
-	"devDependencies": {},
-	"preferUnplugged": true
+  "name": "@swc/plugin-styled-jsx",
+  "version": "6.0.2",
+  "description": "SWC plugin for styled-jsx",
+  "main": "swc_plugin_styled_jsx.wasm",
+  "scripts": {
+    "prepack": "cargo build --release -p swc_plugin_styled_jsx --target wasm32-wasi && cp ../../target/wasm32-wasi/release/swc_plugin_styled_jsx.wasm ."
+  },
+  "homepage": "https://swc.rs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swc-project/plugins.git",
+    "directory": "packages/styled-jsx"
+  },
+  "bugs": {
+    "url": "https://github.com/swc-project/plugins/issues"
+  },
+  "author": "강동윤 <kdy1997.dev@gmail.com>",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "preferUnplugged": true,
+  "dependencies": {
+    "@swc/counter": "^0.1.3"
+  }
 }
